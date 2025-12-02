@@ -1,0 +1,103 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+
+const Projects = () => {
+  const [activeCard, setActiveCard] = useState<number | null>(null);
+
+  const projects = [
+    { id: 1, name: 'Woke' },
+    { id: 2, name: 'Scibbly' },
+    { id: 3, name: 'Project 3' },
+    { id: 4, name: 'Project 4' },
+  ];
+
+  const startAnimation = () => {
+    setActiveCard(null); // Reset first
+    
+    let timeouts: NodeJS.Timeout[] = [];
+    
+    // Animate through each card
+    projects.forEach((_, index) => {
+      const timeout = setTimeout(() => {
+        setActiveCard(index);
+      }, (index + 1) * 800); // Start after a small delay
+      timeouts.push(timeout);
+    });
+
+    // Clear all cards after the last one
+    const finalTimeout = setTimeout(() => {
+      setActiveCard(null);
+    }, (projects.length + 1) * 800 + 1000); // Extra 1s after last card
+    timeouts.push(finalTimeout);
+
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  };
+
+  return (
+    <motion.section
+      id="projects"
+      className="min-h-screen py-24 flex flex-col justify-center"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: false, amount: 0.3 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <div className="mb-12">
+        <h2 className="text-4xl font-bold mb-6">Projects</h2>
+        <p className="text-gray-400 max-w-2xl">
+          Explore my projects: a testament to the art of minimal design
+          meeting functionality. Witnesses to each interface is a narrative of
+          simplicity and purpose, where every element serves a purpose.
+        </p>
+      </div>
+
+      <motion.div 
+        className="flex gap-6 overflow-x-auto overflow-y-hidden pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-8"
+        onViewportEnter={startAnimation}
+        viewport={{ once: false, margin: "-100px" }}
+      >
+        {projects.map((project, index) => (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="group cursor-pointer"
+          >
+            <div className="aspect-square bg-white/5 border border-white/10 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center group-hover:shadow-md transition-all flex-shrink-0 w-64 sm:w-auto">
+               {/* Blurred Grid Background */}
+               <div className="absolute inset-0 opacity-20 pointer-events-none">
+                 <svg className="w-full h-full blur-[1px]" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                   <defs>
+                     <pattern id={`grid-${project.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                       <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-white/30"/>
+                     </pattern>
+                   </defs>
+                   <rect width="100%" height="100%" fill={`url(#grid-${project.id})`} />
+                 </svg>
+               </div>
+
+               {/* All squares start and end white, animate to red during cycle */}
+               <motion.div 
+                 className="w-20 h-20 rounded-lg group-hover:border-white/30 transition-colors z-10 border border-white/10"
+                 initial={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                 animate={{ 
+                   backgroundColor: activeCard === index ? "rgba(255, 107, 107, 1)" : "rgba(255, 255, 255, 0.1)"
+                 }}
+                 transition={{ duration: 0.3, ease: "easeInOut" }}
+               />
+               
+               <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-20" />
+            </div>
+            <h3 className="font-medium text-white group-hover:text-primary transition-colors">{project.name}</h3>
+            <p className="text-sm text-gray-500">App Design</p>
+          </motion.div>
+        ))}
+      </motion.div>
+    </motion.section>
+  );
+};
+
+export default Projects;
