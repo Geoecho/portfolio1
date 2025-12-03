@@ -69,18 +69,34 @@ const Navigation = () => {
     const sectionId = href.substring(1);
     setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
+    
+    // Special behavior per section
+    if (sectionId === 'intro') {
+      // Scroll to the very top of the page
+      smoothScrollTo(0, 700);
+      return;
+    }
+
+    if (sectionId === 'contact') {
+      // Scroll to the very bottom of the page so the end of content is visible
+      const doc = document.documentElement;
+      const maxY = doc.scrollHeight - window.innerHeight;
+      smoothScrollTo(maxY, 700);
+      return;
+    }
+
     if (element) {
       const rect = element.getBoundingClientRect();
-      const headerOffset = 50; // reduced offset for better alignment
+      const headerOffset = 50;
       const targetY = rect.top + (window.pageYOffset || window.scrollY || 0) - headerOffset;
       smoothScrollTo(targetY, 700);
     }
   };
 
   return (
-    <nav className="fixed bottom-6 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 flex justify-center">
-        <div className="flex items-center justify-center gap-1.5 sm:gap-2 p-1.5 bg-[#1A1A1A] rounded-full shadow-2xl border border-white/10 backdrop-blur-md w-auto max-w-full">
+    <nav className="fixed bottom-6 inset-x-0 z-50">
+      <div className="flex justify-center px-4">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 py-2.5 rounded-full shadow-2xl border border-white/10 backdrop-blur-md w-auto max-w-full bg-gradient-to-b from-dark/80 via-dark/95 to-dark/80">
         {/* Home Icon */}
         <motion.button
           whileHover={{ rotate: -4, scale: 1.05 }}

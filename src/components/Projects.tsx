@@ -74,19 +74,29 @@ const Projects = () => {
                      <pattern id={`grid-${project.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-white/30"/>
                      </pattern>
+                     {/* Glow Filter shared with Characteristics */}
+                     <filter id="glow-project" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+                        <feMerge> 
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
                    </defs>
                    <rect width="100%" height="100%" fill={`url(#grid-${project.id})`} />
                  </svg>
                </div>
 
-               {/* All squares start and end white, animate to red during cycle */}
+               {/* All squares start and end white, animate to red with glow during cycle */}
                <motion.div 
-                 className="w-20 h-20 rounded-lg group-hover:border-white/30 transition-colors z-10 border border-white/10"
-                 initial={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                 className="w-16 h-16 rounded-lg group-hover:border-white/30 transition-colors z-10 border border-white/10"
+                 initial={{ backgroundColor: "rgba(255, 255, 255, 0.1)", scale: 1 }}
                  animate={{ 
-                   backgroundColor: activeCard === index ? "rgba(255, 107, 107, 1)" : "rgba(255, 255, 255, 0.1)"
+                   backgroundColor: activeCard === index ? "rgba(255, 107, 107, 0.8)" : "rgba(255, 255, 255, 0.1)",
+                   scale: activeCard === index ? 1.1 : 1,
+                   filter: activeCard === index ? "url(#glow-project)" : "none",
                  }}
-                 transition={{ duration: 0.3, ease: "easeInOut" }}
+                 transition={{ duration: 0.4, ease: "easeInOut" }}
                />
                
                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-20" />

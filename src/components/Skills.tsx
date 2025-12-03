@@ -4,43 +4,43 @@ import { motion } from 'framer-motion';
 const Skills = () => {
   const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
 
-  // Data points: x = time (0-100%), y = proficiency (100-0% where 0 is top)
+  // Data points: x = time (0-1000), y = proficiency (1000-0 where 0 is top)
   const skillsData = [
     {
       name: 'Figma',
       color: '#FF6B6B', // Primary
       points: [
-        { x: 0, y: 100 },   // 2018: Starting
-        { x: 33, y: 50 },   // 2020: Learning fast
-        { x: 66, y: 15 },   // 2022: Advanced
-        { x: 100, y: 5 },   // 2024: Expert
+        { x: 0, y: 1000 },   // 2018: Starting
+        { x: 330, y: 500 },   // 2020: Learning fast
+        { x: 660, y: 150 },   // 2022: Advanced
+        { x: 1000, y: 50 },   // 2024: Expert
       ]
     },
     {
       name: 'Photoshop',
       color: '#FFFFFF', // White for Dark Mode
       points: [
-        { x: 0, y: 60 },    // 2018: Intermediate
-        { x: 33, y: 40 },   // 2020: Improving
-        { x: 66, y: 25 },   // 2022: Advanced
-        { x: 100, y: 20 },  // 2024: Very High
+        { x: 0, y: 600 },    // 2018: Intermediate
+        { x: 330, y: 400 },   // 2020: Improving
+        { x: 660, y: 250 },   // 2022: Advanced
+        { x: 1000, y: 200 },  // 2024: Very High
       ]
     },
     {
       name: 'Illustrator',
       color: '#9CA3AF', // Gray-400
       points: [
-        { x: 0, y: 70 },    // 2018: Basic
-        { x: 33, y: 55 },   // 2020: Intermediate
-        { x: 66, y: 40 },   // 2022: Solid
-        { x: 100, y: 30 },  // 2024: Advanced
+        { x: 0, y: 700 },    // 2018: Basic
+        { x: 330, y: 550 },   // 2020: Intermediate
+        { x: 660, y: 400 },   // 2022: Solid
+        { x: 1000, y: 300 },  // 2024: Advanced
       ]
     }
   ];
 
   // Helper to generate smooth path
   const generatePath = (points: {x: number, y: number}[]) => {
-    const d = 15; // Control point offset for tension
+    const d = 150; // Control point offset for tension
     return `M ${points[0].x} ${points[0].y} 
             C ${points[0].x + d} ${points[0].y}, ${points[1].x - d} ${points[1].y}, ${points[1].x} ${points[1].y}
             S ${points[2].x - d} ${points[2].y}, ${points[2].x} ${points[2].y}
@@ -67,11 +67,11 @@ const Skills = () => {
       </div>
         
       {/* Legend / Controls - Above Graph */}
-      <div className="flex gap-8 mb-8 pb-4">
+      <div className="flex gap-8 mb-8 pb-4 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
         {skillsData.map((skill) => (
           <motion.button 
             key={skill.name}
-              className={`group flex items-center gap-3 cursor-pointer transition-all duration-300 outline-none ${
+              className={`group flex items-center gap-3 cursor-pointer transition-all duration-300 outline-none flex-shrink-0 ${
                 hoveredSkill && hoveredSkill !== skill.name ? 'opacity-30' : 'opacity-100'
               }`}
               onMouseEnter={() => setHoveredSkill(skill.name)}
@@ -84,7 +84,7 @@ const Skills = () => {
                 }`}
                 style={{ backgroundColor: skill.color }} 
               />
-              <span className="text-sm font-medium text-gray-300 uppercase tracking-wider">{skill.name}</span>
+              <span className="text-sm font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">{skill.name}</span>
             </motion.button>
           ))}
         </div>
@@ -107,7 +107,7 @@ const Skills = () => {
                 {/* Horizontal Lines */}
                 <div className="w-full h-full flex flex-col justify-between">
                   {[0, 1, 2, 3, 4].map((_, i) => (
-                    <div key={i} className="w-full h-px bg-white/10 dashed" />
+                    <div key={i} className="w-full h-px bg-white/10" />
                   ))}
                 </div>
                 {/* Vertical Lines */}
@@ -119,8 +119,8 @@ const Skills = () => {
              </div>
 
              {/* The Wavy Lines (SVG) */}
-             <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
-              {skillsData.map((skill) => (
+             <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+              {skillsData.map((skill, skillIndex) => (
                 <React.Fragment key={skill.name}>
                   <motion.path 
                     d={generatePath(skill.points)} 
@@ -129,6 +129,9 @@ const Skills = () => {
                     strokeWidth="1.5"
                     vectorEffect="non-scaling-stroke"
                     strokeOpacity={hoveredSkill && hoveredSkill !== skill.name ? 0.1 : 1}
+                    initial={{ pathLength: 0 }}
+                    whileInView={{ pathLength: 1 }}
+                    transition={{ duration: 1.5, ease: "easeInOut", delay: skillIndex * 0.2 }}
                   />
                 </React.Fragment>
               ))}

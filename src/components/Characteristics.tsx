@@ -59,43 +59,119 @@ const Characteristics = () => {
 
             {/* The Shape */}
             <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
-              {/* Background shape (static or slightly rotating) */}
-              <motion.path
-                d="M 100 10 C 110 60 140 90 190 100 C 140 110 110 140 100 190 C 90 140 60 110 10 100 C 60 90 90 60 100 10 Z"
-                fill="none"
-                stroke="#FFFFFF"
-                strokeWidth="0.5"
-                className="opacity-20"
-                initial={{ pathLength: 0, rotate: 0 }}
-                whileInView={{ pathLength: 1, rotate: 360 }}
+              {/* Define a glow filter for futuristic effect */}
+              <defs>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Background Layer - Rotating Shape + Extra Traits */}
+              <motion.g
+                initial={{ rotate: 0, scale: 0.65 }}
+                whileInView={{ rotate: 360 }}
                 transition={{ 
-                  pathLength: { duration: 2 },
                   rotate: { duration: 20, repeat: Infinity, ease: "linear" }
                 }}
-              />
+                style={{ transformOrigin: "100px 100px" }}
+              >
+                {/* Background shape - Gray */}
+                <motion.path
+                  d="M 100 10 C 110 60 140 90 190 100 C 140 110 110 140 100 190 C 90 140 60 110 10 100 C 60 90 90 60 100 10 Z"
+                  fill="none"
+                  stroke="#868585"
+                  strokeWidth="0.5"
+                  className="opacity-50"
+                  initial={{ pathLength: 0 }}
+                  whileInView={{ pathLength: 1 }}
+                  transition={{ 
+                    pathLength: { duration: 2 }
+                  }}
+                />
+                
+                {/* Extra Traits on corners - Counter-rotated to stay upright */}
+                {/* Top Corner (100, 10) */}
+                <motion.text
+                  x="100" y="25"
+                  textAnchor="middle"
+                  fill="#868585"
+                  className="text-[10px] font-bold opacity-80"
+                  initial={{ rotate: 0 }}
+                  whileInView={{ rotate: -360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  style={{ transformOrigin: "100px 25px" }}
+                >
+                  Creative
+                </motion.text>
+
+                {/* Right Corner (190, 100) */}
+                <motion.text
+                  x="175" y="105"
+                  textAnchor="middle"
+                  fill="#868585"
+                  className="text-[10px] font-bold opacity-80"
+                  initial={{ rotate: 0 }}
+                  whileInView={{ rotate: -360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  style={{ transformOrigin: "175px 105px" }}
+                >
+                  Detail Oriented
+                </motion.text>
+
+                {/* Bottom Corner (100, 190) */}
+                <motion.text
+                  x="100" y="180"
+                  textAnchor="middle"
+                  fill="#868585"
+                  className="text-[10px] font-bold opacity-80"
+                  initial={{ rotate: 0 }}
+                  whileInView={{ rotate: -360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  style={{ transformOrigin: "100px 180px" }}
+                >
+                  Precise
+                </motion.text>
+
+                {/* Left Corner (10, 100) */}
+                <motion.text
+                  x="25" y="105"
+                  textAnchor="middle"
+                  fill="#868585"
+                  className="text-[10px] font-bold opacity-80"
+                  initial={{ rotate: 0 }}
+                  whileInView={{ rotate: -360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  style={{ transformOrigin: "25px 105px" }}
+                >
+                  Intuitive
+                </motion.text>
+              </motion.g>
               
-              {/* Inner shape (The data representation) - Rotated 45deg to match labels */}
+              {/* Glowing Filled Indicator - Scales in after 1s - Red */}
               <motion.path
                 d="M 100 30 C 105 65 135 95 170 100 C 135 105 105 135 100 170 C 95 135 65 105 30 100 C 65 95 95 65 100 30 Z" 
-                fill="none"
+                fill="rgba(255, 107, 107, 0.1)"
                 stroke="#FF6B6B" 
-                strokeWidth="1.5"
-                initial={{ pathLength: 0, scale: 0.8, opacity: 0, rotate: 45 }}
-                whileInView={{ pathLength: 1, scale: 1, opacity: 1, rotate: 45 }}
-                transition={{ duration: 1.5, delay: 0.5 }}
-              />
-              
-              {/* Grid/Radar lines (Cross) - Rotated 45deg to point to labels */}
-              <motion.path
-                d="M 100 10 L 100 190 M 10 100 L 190 100"
-                stroke="rgba(255,255,255,0.2)"
-                strokeWidth="1"
-                strokeDasharray="4 4"
-                initial={{ opacity: 0, rotate: 45 }}
-                whileInView={{ opacity: 1, rotate: 45 }}
-                transition={{ delay: 1 }}
+                strokeWidth="2"
+                filter="url(#glow)"
+                initial={{ scale: 0, opacity: 0, rotate: 45 }}
+                whileInView={{ 
+                  scale: 1, 
+                  opacity: 1, 
+                  rotate: 45 
+                }}
+                transition={{ 
+                  duration: 1.2, 
+                  delay: 1,
+                  ease: "easeOut"
+                }}
                 style={{ transformOrigin: "100px 100px" }}
               />
+              
             </svg>
           </div>
         </div>
