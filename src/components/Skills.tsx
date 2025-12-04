@@ -77,6 +77,7 @@ const Skills = () => {
               onMouseEnter={() => setHoveredSkill(skill.name)}
               onMouseLeave={() => setHoveredSkill(null)}
               onClick={() => setHoveredSkill(skill.name === hoveredSkill ? null : skill.name)}
+              whileTap={{ scale: 0.95 }}
             >
               <div 
                 className={`w-3 h-3 rounded-full transition-transform duration-300 group-hover:scale-125 ${
@@ -90,7 +91,7 @@ const Skills = () => {
         </div>
 
         {/* Chart Container */}
-        <div className="relative h-[400px] w-full bg-white/5 rounded-xl border border-white/10 p-4 md:p-8 shadow-sm overflow-hidden">
+        <div className="relative h-[280px] sm:h-[340px] md:h-[400px] w-full bg-white/5 rounded-xl border border-white/10 p-4 md:p-8 shadow-sm overflow-hidden">
           
           {/* X Axis Labels (Years) */}
           <div className="absolute left-4 right-4 md:left-8 md:right-8 bottom-4 flex justify-between text-sm font-bold text-gray-500">
@@ -127,16 +128,24 @@ const Skills = () => {
                     fill="none" 
                     stroke={skill.color} 
                     strokeWidth="1.5"
+                    strokeLinecap="round"
                     vectorEffect="non-scaling-stroke"
                     strokeOpacity={hoveredSkill && hoveredSkill !== skill.name ? 0.1 : 1}
                     initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
+                    whileInView={{ pathLength: 1.05 }}
                     transition={{ duration: 1.5, ease: "easeInOut", delay: skillIndex * 0.2 }}
                   />
                 </React.Fragment>
               ))}
             </svg>
 
+          </div>
+
+          {/* Right-side proficiency scale (1–5) - outside the graph area */}
+          <div className="absolute top-8 bottom-12 right-1 md:right-3 flex flex-col justify-between items-end text-[10px] md:text-xs text-gray-500 pointer-events-none">
+            {[5, 4, 3, 2, 1].map((level) => (
+              <span key={level}>{level}</span>
+            ))}
           </div>
         </div>
     </motion.section>

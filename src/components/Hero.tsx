@@ -30,6 +30,7 @@ const Hero = () => {
               <motion.span
                 className="bg-primary text-white px-2 py-1 box-decoration-clone text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-light leading-snug inline-block cursor-pointer"
                 whileHover="hover"
+                whileTap="hover"
               >
                 A Chronicle of my Design{" "}
                 <span className="whitespace-nowrap inline-flex items-center">
@@ -51,9 +52,9 @@ const Hero = () => {
             </span>
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
+            transition={{ duration: 0.7, ease: 'easeOut', delay: 0.25 }}
             className="text-gray-400 text-lg max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Greetings! I'm Hristijan, a passionate 26-year-old UI/UX designer based in the city of Skopje, Macedonia.
@@ -67,27 +68,48 @@ const Hero = () => {
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }}
             className="flex justify-center gap-8 items-center"
           >
-            <a 
+            <motion.a 
               href="#" 
-              className="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300"
+              className="text-gray-400 hover:text-primary transition-colors duration-300"
               aria-label="Dribbble"
+              whileHover={{ scale: 1.08, y: -1 }}
+              whileTap={{ scale: 0.92, y: 0 }}
+              animate={{ y: [0, -3, 0] }}
+              transition={{
+                y: { duration: 3, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut', delay: 0 },
+                default: { type: 'spring', stiffness: 260, damping: 20 }
+              }}
             >
               <Dribbble size={28} strokeWidth={1.5} />
-            </a>
-            <a 
+            </motion.a>
+            <motion.a 
               href="#" 
-              className="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300"
+              className="text-gray-400 hover:text-primary transition-colors duration-300"
               aria-label="Instagram"
+              whileHover={{ scale: 1.08, y: -1 }}
+              whileTap={{ scale: 0.92, y: 0 }}
+              animate={{ y: [0, -3, 0] }}
+              transition={{
+                y: { duration: 3, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut', delay: 0.15 },
+                default: { type: 'spring', stiffness: 260, damping: 20 }
+              }}
             >
               <Instagram size={28} strokeWidth={1.5} />
-            </a>
-            <a 
+            </motion.a>
+            <motion.a 
               href="#" 
-              className="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300"
+              className="text-gray-400 hover:text-primary transition-colors duration-300"
               aria-label="LinkedIn"
+              whileHover={{ scale: 1.08, y: -1 }}
+              whileTap={{ scale: 0.92, y: 0 }}
+              animate={{ y: [0, -3, 0] }}
+              transition={{
+                y: { duration: 3, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut', delay: 0.3 },
+                default: { type: 'spring', stiffness: 260, damping: 20 }
+              }}
             >
               <Linkedin size={28} strokeWidth={1.5} />
-            </a>
+            </motion.a>
           </motion.div>
         </motion.div>
       </div>

@@ -4,7 +4,7 @@ import {
   PenTool, Figma, Image as ImageIcon, Layers, Palette, Crop, 
   Frame, Type, Pencil, Brush, Eraser, Scissors, PaintBucket, 
   Wand2, MousePointer2, Move, LayoutTemplate, Component, 
-  BoxSelect, Grid, Ruler, Eye, Lock, Focus, Globe
+  BoxSelect, Grid, Ruler, Eye, Lock, Focus
 } from 'lucide-react';
 
 const ALL_ICONS = [
@@ -14,7 +14,6 @@ const ALL_ICONS = [
   BoxSelect, Grid, Ruler, Eye, Lock, Focus
 ];
 
-const GRID_SIZE = 50;
 const MAIN_CONTENT_MAX_WIDTH = 1280; // max-w-7xl
 const ICON_SIZE = 24;
 
@@ -24,6 +23,7 @@ type IconPosition = {
   y: number;
   Icon: React.ElementType;
   delay: number;
+  rotationDuration?: number;
   opacity?: number;
   rainDuration?: number;
   rainDelay?: number;
@@ -80,7 +80,6 @@ export default function BackgroundIcons() {
       
       // Calculate safe zone (main content)
       const centerX = width / 2;
-      const centerY = window.innerHeight / 2;
       const safeZoneHalf = Math.min(width, MAIN_CONTENT_MAX_WIDTH) / 2;
       
       // Desktop: Filter columns that overlap with content
@@ -180,17 +179,22 @@ export default function BackgroundIcons() {
             baseOpacity = 0.15 + (0.45 * Math.pow(opacityFactor, 1.2));
         }
         
-        // Generate random rain parameters
+        // Generate random rain parameters (mobile)
         // Faster: 2s to 5s (was 4s to 8s)
         const rainDuration = 2 + random() * 3; 
         const rainDelay = random() * 5;
+
+        // Desktop rotation randomness
+        const rotationDelay = random() * 5; // 0–5s delay
+        const rotationDuration = 4 + random() * 4; // 4–8s per full rotation
 
         generatedIcons.push({
           id: `icon-${r}-${col}`,
           x: col * gridSize + (gridSize - ICON_SIZE) / 2,
           y: r * gridSize + (gridSize - ICON_SIZE) / 2,
           Icon,
-          delay: 1.5, 
+          delay: rotationDelay,
+          rotationDuration,
           opacity: baseOpacity,
           rainDuration,
           rainDelay
@@ -210,7 +214,7 @@ export default function BackgroundIcons() {
       className="fixed inset-0 z-0 overflow-hidden transition-opacity duration-300 ease-out"
       style={{ opacity: isMobile ? scrollOpacity : 1 }}
     >
-      {icons.map(({ id, x, y, Icon, opacity, rainDuration, rainDelay }) => (
+      {icons.map(({ id, x, y, Icon, opacity, rainDuration, rainDelay, delay, rotationDuration }) => (
         <motion.div
           key={id}
           initial={{ opacity: 0, y: 0 }}
@@ -218,7 +222,8 @@ export default function BackgroundIcons() {
             y: [-50, 140], 
             opacity: [0, opacity, 0] 
           } : { 
-            opacity 
+            opacity,
+            rotate: [0, 360]
           }} 
           transition={isMobile ? {
             duration: rainDuration,
@@ -226,18 +231,15 @@ export default function BackgroundIcons() {
             ease: "linear",
             delay: rainDelay
           } : { 
-            delay: 1.5, 
-            duration: 1.5, 
-            ease: "easeOut" 
+            delay,
+            duration: rotationDuration ?? 6,
+            repeat: Infinity,
+            ease: "linear" 
           }}
           // Desktop-only hover spin
-          whileHover={
-            isMobile
-              ? undefined
-              : { rotate: 360, transition: { duration: 0.6, ease: "easeInOut" } }
-          }
+          whileHover={undefined}
           whileTap={isMobile ? undefined : { scale: 0.98 }}
-          className="absolute text-primary pointer-events-auto"
+          className="absolute text-primary pointer-events-none"
           style={{ left: x, top: y }}
         >
           <Icon size={ICON_SIZE} />

@@ -70,7 +70,7 @@ const Characteristics = () => {
                 </filter>
               </defs>
 
-              {/* Background Layer - Rotating Shape + Extra Traits */}
+              {/* Background Layer - Rotating Shape + orbiting traits */}
               <motion.g
                 initial={{ rotate: 0, scale: 0.65 }}
                 whileInView={{ rotate: 360 }}
@@ -92,9 +92,8 @@ const Characteristics = () => {
                     pathLength: { duration: 2 }
                   }}
                 />
-                
-                {/* Extra Traits on corners - Counter-rotated to stay upright */}
-                {/* Top Corner (100, 10) */}
+
+                {/* Traits at 4 sides, counter‑rotated so they stay horizontal while orbiting */}
                 <motion.text
                   x="100" y="25"
                   textAnchor="middle"
@@ -103,12 +102,11 @@ const Characteristics = () => {
                   initial={{ rotate: 0 }}
                   whileInView={{ rotate: -360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  style={{ transformOrigin: "100px 25px" }}
+                  style={{ transformBox: "view-box", transformOrigin: "100px 100px" }}
                 >
                   Creative
                 </motion.text>
 
-                {/* Right Corner (190, 100) */}
                 <motion.text
                   x="175" y="105"
                   textAnchor="middle"
@@ -117,12 +115,11 @@ const Characteristics = () => {
                   initial={{ rotate: 0 }}
                   whileInView={{ rotate: -360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  style={{ transformOrigin: "175px 105px" }}
+                  style={{ transformBox: "view-box", transformOrigin: "100px 100px" }}
                 >
                   Detail Oriented
                 </motion.text>
 
-                {/* Bottom Corner (100, 190) */}
                 <motion.text
                   x="100" y="180"
                   textAnchor="middle"
@@ -131,12 +128,11 @@ const Characteristics = () => {
                   initial={{ rotate: 0 }}
                   whileInView={{ rotate: -360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  style={{ transformOrigin: "100px 180px" }}
+                  style={{ transformBox: "view-box", transformOrigin: "100px 100px" }}
                 >
                   Precise
                 </motion.text>
 
-                {/* Left Corner (10, 100) */}
                 <motion.text
                   x="25" y="105"
                   textAnchor="middle"
@@ -145,7 +141,7 @@ const Characteristics = () => {
                   initial={{ rotate: 0 }}
                   whileInView={{ rotate: -360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  style={{ transformOrigin: "25px 105px" }}
+                  style={{ transformBox: "view-box", transformOrigin: "100px 100px" }}
                 >
                   Intuitive
                 </motion.text>

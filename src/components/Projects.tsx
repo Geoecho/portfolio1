@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Projects = () => {
   const [activeCard, setActiveCard] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
 
   const projects = [
     { id: 1, name: 'Woke' },
     { id: 2, name: 'Scibbly' },
     { id: 3, name: 'Project 3' },
     { id: 4, name: 'Project 4' },
+    { id: 5, name: 'Project 5' },
+    { id: 6, name: 'Project 6' },
   ];
 
   const startAnimation = () => {
@@ -35,10 +43,56 @@ const Projects = () => {
     };
   };
 
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track) return;
+
+    const ctx = gsap.context(() => {
+      const totalWidth = track.scrollWidth;
+      const viewportWidth = section.clientWidth;
+      const maxTranslate = Math.max(0, totalWidth - viewportWidth);
+
+      if (maxTranslate <= 0) return;
+
+      const scrollDistance = maxTranslate * 1.2; // less vertical scroll needed for full horizontal travel
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: `+=${scrollDistance}`,
+          scrub: 0.8,
+          pin: true,
+          anticipatePin: 0.8,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      // Fade the section in at the start of the pin
+
+      // Keep content static for nearly half of the pinned scroll, then move horizontally,
+      // and hold the final frame a bit longer so the section doesn’t disappear instantly.
+      tl.fromTo(
+        track,
+        { x: 0 },
+        { x: -maxTranslate, ease: 'none', duration: 1 },
+        0.6 // start horizontal movement after more scroll while pinned
+      ).to(
+        track,
+        { x: -maxTranslate, duration: 0.4 },
+        1.6 // short hold at the end before unpinning
+      );
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <motion.section
       id="projects"
       className="min-h-screen py-24 flex flex-col justify-center"
+      ref={sectionRef}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: false, amount: 0.3 }}
@@ -53,11 +107,13 @@ const Projects = () => {
         </p>
       </div>
 
-      <motion.div 
-        className="flex gap-6 overflow-x-auto overflow-y-hidden pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-8"
-        onViewportEnter={startAnimation}
-        viewport={{ once: false, margin: "-100px" }}
-      >
+      <div className="overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <motion.div 
+          ref={trackRef}
+          className="flex flex-nowrap gap-4 sm:gap-6 lg:gap-10 pb-2"
+          onViewportEnter={startAnimation}
+          viewport={{ once: false, margin: "-100px" }}
+        >
         {projects.map((project, index) => (
           <motion.div
             key={project.id}
@@ -65,8 +121,9 @@ const Projects = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className="group cursor-pointer"
+            whileTap={{ scale: 0.96 }}
           >
-            <div className="aspect-square bg-white/5 border border-white/10 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center group-hover:shadow-md transition-all flex-shrink-0 w-64 sm:w-auto">
+            <div className="aspect-square bg-white/5 border border-white/10 rounded-xl mb-4 overflow-hidden relative flex items-center justify-center group-hover:shadow-md transition-all flex-shrink-0 w-64 md:w-56 lg:w-80">
                {/* Blurred Grid Background */}
                <div className="absolute inset-0 opacity-20 pointer-events-none">
                  <svg className="w-full h-full blur-[1px]" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -105,7 +162,8 @@ const Projects = () => {
             <p className="text-sm text-gray-500">App Design</p>
           </motion.div>
         ))}
-      </motion.div>
+        </motion.div>
+      </div>
     </motion.section>
   );
 };

@@ -77,17 +77,9 @@ const Navigation = () => {
       return;
     }
 
-    if (sectionId === 'contact') {
-      // Scroll to the very bottom of the page so the end of content is visible
-      const doc = document.documentElement;
-      const maxY = doc.scrollHeight - window.innerHeight;
-      smoothScrollTo(maxY, 700);
-      return;
-    }
-
     if (element) {
       const rect = element.getBoundingClientRect();
-      const headerOffset = 50;
+      const headerOffset = 20;
       const targetY = rect.top + (window.pageYOffset || window.scrollY || 0) - headerOffset;
       smoothScrollTo(targetY, 700);
     }
@@ -100,7 +92,12 @@ const Navigation = () => {
         {/* Home Icon */}
         <motion.button
           whileHover={{ rotate: -4, scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{ scale: [1, 1.03, 1], y: [0, -1, 0] }}
+          transition={{
+            scale: { duration: 4, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
+            y: { duration: 4, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }
+          }}
           onClick={() => handleClick('#intro')}
           className={`p-2.5 sm:p-3 rounded-full transition-colors duration-300 flex-shrink-0 flex items-center justify-center ${
             activeSection === 'intro'
@@ -141,10 +138,15 @@ const Navigation = () => {
 
         {/* Contact CTA */}
         <motion.button
-          whileHover={{ rotate: 3, scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
+          whileHover={{ rotate: 3, scale: 1.06, y: -1 }}
+          whileTap={{ scale: 0.94 }}
+          animate={{ scale: [1, 1.035, 1], y: [0, -1, 0] }}
+          transition={{
+            scale: { duration: 4.2, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut', delay: 0.2 },
+            y: { duration: 4.2, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut', delay: 0.2 }
+          }}
           onClick={() => handleClick('#contact')}
-          className={`flex items-center gap-0.5 sm:gap-1.5 px-3.5 sm:px-4.5 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 whitespace-nowrap flex-shrink-0 ${
+          className={`flex items-center gap-1 sm:gap-2 px-3.5 sm:px-4.5 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 whitespace-nowrap flex-shrink-0 ${
             activeSection === 'contact'
               ? 'bg-primary text-white shadow-lg'
               : 'bg-white text-dark hover:bg-primary hover:text-white'
