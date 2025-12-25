@@ -76,13 +76,13 @@ const DesignPhilosophy = () => {
     <motion.section
       id="philosophy"
       className="pt-12 pb-16 sm:py-[60px]"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
+      initial={{ opacity: 0, y: 60, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.2 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="mb-12 sm:mb-16 text-right">
-        <h2 className="text-4xl font-bold mb-6">Design Philosophy</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6">Design Philosophy</h2>
         <p className="text-muted max-w-2xl ml-auto leading-relaxed">
           My approach to design is rooted in clarity, intention, and empathy.
           These principles guide every decision, from the first sketch to the final pixel.

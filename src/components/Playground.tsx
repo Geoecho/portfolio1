@@ -118,13 +118,13 @@ const Playground = () => {
     <motion.section
       id="playground"
       className="pt-12 pb-16 sm:py-[60px]"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
+      initial={{ opacity: 0, y: 60, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.3 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="mb-12 sm:mb-16">
-        <h2 className="text-4xl font-bold mb-6">Playground</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6">Playground</h2>
         <p className="text-muted max-w-2xl leading-relaxed">
           A space for experimentation, exploration, and creative freedom.
           Here's where ideas come to play without the constraints of client work.

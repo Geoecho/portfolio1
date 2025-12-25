@@ -26,6 +26,7 @@ export default {
       fontFamily: {
         heading: ['"Work Sans"', 'sans-serif'],
         body: ['"DM Sans"', 'sans-serif'],
+        space: ['"Space Grotesk"', 'sans-serif'],
       },
     },
   },

@@ -66,13 +66,13 @@ const Contact = () => {
     <motion.section
       id="contact"
       className="min-h-screen pt-16 pb-32 sm:py-[60px] flex flex-col justify-center items-center text-center"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 60, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: false, amount: 0.3 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="w-full max-w-2xl px-4 sm:px-0">
-        <h2 className="text-4xl font-bold mb-6">Contact</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6">Contact</h2>
         <p className="text-muted mb-12 max-w-xl mx-auto">
           Feel free to contact me at any time.
         </p>

@@ -108,15 +108,15 @@ const Skills = () => {
     <motion.section
       id="skills"
       className="py-16 sm:py-[60px] relative overflow-hidden"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
+      initial={{ opacity: 0, y: 60, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.25 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       {/* Header Section - Matching Projects/Characteristics style */}
       <div className="mb-12 sm:mb-16">
-        <h2 className="text-4xl font-bold mb-6">Technical Skills</h2>
-        <p className="text-muted max-w-2xl leading-relaxed">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6">Technical Skills</h2>
+        <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
           My proficiency in design tools has evolved into a robust skillset.
           Over the years, I've transitioned from traditional image editing to
           mastering modern UI/UX workflows, with <span className="font-bold text-primary">Figma</span> becoming my primary driver.
