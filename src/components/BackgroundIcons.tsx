@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  PenTool, Figma, Image as ImageIcon, Layers, Palette, Crop, 
-  Frame, Type, Pencil, Brush, Eraser, Scissors, PaintBucket, 
-  Wand2, MousePointer2, Move, LayoutTemplate, Component, 
+import {
+  PenTool, Figma, Image as ImageIcon, Layers, Palette, Crop,
+  Frame, Type, Pencil, Brush, Eraser, Scissors, PaintBucket,
+  Wand2, MousePointer2, Move, LayoutTemplate, Component,
   BoxSelect, Grid, Ruler, Eye, Lock, Focus
 } from 'lucide-react';
 
 const ALL_ICONS = [
-  PenTool, Figma, ImageIcon, Layers, Palette, Crop, 
-  Frame, Type, Pencil, Brush, Eraser, Scissors, PaintBucket, 
-  Wand2, MousePointer2, Move, LayoutTemplate, Component, 
+  PenTool, Figma, ImageIcon, Layers, Palette, Crop,
+  Frame, Type, Pencil, Brush, Eraser, Scissors, PaintBucket,
+  Wand2, MousePointer2, Move, LayoutTemplate, Component,
   BoxSelect, Grid, Ruler, Eye, Lock, Focus
 ];
 
@@ -31,7 +31,7 @@ type IconPosition = {
 
 // Simple seeded RNG
 function mulberry32(a: number) {
-  return function() {
+  return function () {
     var t = a += 0x6D2B79F5;
     t = Math.imul(t ^ t >>> 15, t | 1);
     t ^= t + Math.imul(t ^ t >>> 7, t | 61);
@@ -74,14 +74,14 @@ export default function BackgroundIcons() {
       // Use a fixed seed for determinism
       const seed = 123456;
       const random = mulberry32(seed);
-      
+
       const rows = Math.ceil(window.innerHeight / gridSize);
       const cols = Math.ceil(width / gridSize);
-      
+
       // Calculate safe zone (main content)
       const centerX = width / 2;
       const safeZoneHalf = Math.min(width, MAIN_CONTENT_MAX_WIDTH) / 2;
-      
+
       // Desktop: Filter columns that overlap with content
       const availableCols: number[] = [];
       if (!mobile) {
@@ -89,7 +89,7 @@ export default function BackgroundIcons() {
           const colX = c * gridSize;
           const colCenter = colX + gridSize / 2;
           if (colCenter < centerX - safeZoneHalf || colCenter > centerX + safeZoneHalf) {
-              availableCols.push(c);
+            availableCols.push(c);
           }
         }
       } else {
@@ -120,68 +120,58 @@ export default function BackgroundIcons() {
         const rowY = r * gridSize;
         const rowCenter = rowY + gridSize / 2;
 
-        // Mobile Vertical Safe Zone Check
-        // Exclude the middle 40% of the screen (30% to 70%)
-        // This ensures icons are only at the very top and bottom, ending before the heading
+        // Mobile Vertical Area
+        // Only spawn icons in the upper ~35% of the viewport so they disappear
+        // before reaching the main heading area.
         if (mobile) {
-           const safeTop = window.innerHeight * 0.30;
-           const safeBottom = window.innerHeight * 0.70;
-           if (rowCenter > safeTop && rowCenter < safeBottom) {
-             continue; // Skip this row
-           }
+          const maxIconArea = window.innerHeight * 0.25; // Reduce spawn height to avoid title overlap
+          if (rowCenter > maxIconArea) {
+            continue; // Skip rows that would place icons too close to the heading
+          }
         }
 
         if (currentPool.length === 0) {
           currentPool = shuffle(availableCols, random);
         }
-        
+
         // Pick a column
         // Try to avoid same column as previous row to prevent stacking
         let colIndex = currentPool.length - 1;
         let col = currentPool[colIndex];
-        
+
         if (col === prevCol && currentPool.length > 1) {
-            // Swap with previous element in pool if strictly repeating
-            colIndex = currentPool.length - 2;
-            col = currentPool[colIndex];
-            
-            // Remove the selected one
-            currentPool.splice(colIndex, 1);
+          // Swap with previous element in pool if strictly repeating
+          colIndex = currentPool.length - 2;
+          col = currentPool[colIndex];
+
+          // Remove the selected one
+          currentPool.splice(colIndex, 1);
         } else {
-            currentPool.pop();
+          currentPool.pop();
         }
-        
+
         prevCol = col;
-        
+
         const Icon = ALL_ICONS[col % ALL_ICONS.length];
-        
+
         let baseOpacity = 0;
 
         if (mobile) {
-            // Mobile Opacity: Vertical Gradient from Edge (100%) to Safe Zone (0%)
-            // "more visible starting from 100% at top and gradually going down and ending before the heading"
-            
-            const distFromEdge = Math.min(rowCenter, window.innerHeight - rowCenter);
-            const fadeZoneSize = window.innerHeight * 0.30; // Size of the area with icons
-            
-            // Linear fade: 0 at edge -> 1 at fadeZone limit? No, 1 at edge -> 0 at limit.
-            let opacity = 1 - (distFromEdge / fadeZoneSize);
-            
-            // Clamp 0-1 and ensure it hits 1.0
-            baseOpacity = Math.max(0, Math.min(1, opacity));
+          // Mobile: keep icons clearly visible in the top area
+          baseOpacity = 1;
         } else {
-            // Desktop Opacity: Based on distance from center X (Existing logic)
-            const dist = Math.abs(col * gridSize + gridSize / 2 - centerX);
-            const maxDist = width / 2;
-            const minDist = safeZoneHalf;
-            let opacityFactor = (dist - minDist) / (maxDist - minDist);
-            opacityFactor = Math.max(0, Math.min(1, opacityFactor));
-            baseOpacity = 0.15 + (0.45 * Math.pow(opacityFactor, 1.2));
+          // Desktop Opacity: Based on distance from center X (Existing logic)
+          const dist = Math.abs(col * gridSize + gridSize / 2 - centerX);
+          const maxDist = width / 2;
+          const minDist = safeZoneHalf;
+          let opacityFactor = (dist - minDist) / (maxDist - minDist);
+          opacityFactor = Math.max(0, Math.min(1, opacityFactor));
+          baseOpacity = 0.15 + (0.45 * Math.pow(opacityFactor, 1.2));
         }
-        
+
         // Generate random rain parameters (mobile)
         // Faster: 2s to 5s (was 4s to 8s)
-        const rainDuration = 2 + random() * 3; 
+        const rainDuration = 2 + random() * 3;
         const rainDelay = random() * 5;
 
         // Desktop rotation randomness
@@ -200,7 +190,7 @@ export default function BackgroundIcons() {
           rainDelay
         });
       }
-      
+
       setIcons(generatedIcons);
     };
 
@@ -210,31 +200,32 @@ export default function BackgroundIcons() {
   }, []);
 
   return (
-    <div 
-      className="fixed inset-0 z-0 overflow-hidden transition-opacity duration-300 ease-out"
+    <div
+      className="fixed inset-0 z-0 overflow-hidden transition-opacity duration-300 ease-out pointer-events-none"
       style={{ opacity: isMobile ? scrollOpacity : 1 }}
     >
       {icons.map(({ id, x, y, Icon, opacity, rainDuration, rainDelay, delay, rotationDuration }) => (
         <motion.div
           key={id}
           initial={{ opacity: 0, y: 0 }}
-          animate={isMobile ? { 
-            y: [-50, 140], 
-            opacity: [0, opacity, 0] 
-          } : { 
+          animate={isMobile ? {
+            y: [-50, 100], // Shorten fall distance
+            opacity: [0, opacity, opacity, 0]
+          } : {
             opacity,
             rotate: [0, 360]
-          }} 
+          }}
           transition={isMobile ? {
             duration: rainDuration,
             repeat: Infinity,
             ease: "linear",
-            delay: rainDelay
-          } : { 
+            delay: rainDelay,
+            times: [0, 0.1, 0.9, 1]
+          } : {
             delay,
             duration: rotationDuration ?? 6,
             repeat: Infinity,
-            ease: "linear" 
+            ease: "linear"
           }}
           // Desktop-only hover spin
           whileHover={undefined}
