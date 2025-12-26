@@ -114,9 +114,16 @@ const Navigation = () => {
       const MOBILE_OFFSET = 40;
 
       const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-      const offset = isDesktop ? DESKTOP_OFFSET : MOBILE_OFFSET;
 
-      const targetY = rect.top + scrollTop - offset;
+      let targetY;
+
+      if (sectionId === 'contact' && !isDesktop) {
+        // Center alignment for Contact on Mobile
+        targetY = (rect.top + scrollTop) + (rect.height / 2) - (window.innerHeight / 2);
+      } else {
+        const offset = isDesktop ? DESKTOP_OFFSET : MOBILE_OFFSET;
+        targetY = rect.top + scrollTop - offset;
+      }
 
       smoothScrollTo(Math.max(targetY, 0), 1000);
     }

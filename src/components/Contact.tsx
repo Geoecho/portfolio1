@@ -65,7 +65,7 @@ const Contact = () => {
   return (
     <section
       id="contact"
-      className="min-h-screen py-20 sm:py-[60px] flex flex-col justify-center items-center text-center scroll-mt-[40px]"
+      className="min-h-[100dvh] flex flex-col justify-center items-center text-center scroll-mt-[40px] pt-20 pb-36 lg:pb-48"
     >
       <motion.div
         initial={{ opacity: 0, y: 60, scale: 0.95 }}
