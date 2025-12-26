@@ -3,7 +3,7 @@ import { Home, Send, Menu, X, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
-const smoothScrollTo = (targetY: number, duration = 800) => {
+const smoothScrollTo = (targetY: number, duration = 1000) => {
   const startY = window.pageYOffset || window.scrollY || 0;
   const distance = targetY - startY;
   let startTime: number | null = null;
@@ -105,18 +105,20 @@ const Navigation = () => {
     setIsMenuOpen(false);
     const element = document.getElementById(sectionId);
 
-    // Home section gets centered/top treatment
-    if (sectionId === 'intro') {
-      smoothScrollTo(0, 700);
-      return;
-    }
-
     if (element) {
       const rect = element.getBoundingClientRect();
       const scrollTop = window.pageYOffset || window.scrollY || 0;
 
-      const targetY = rect.top + scrollTop;
-      smoothScrollTo(Math.max(targetY, 0), 700);
+      // Explicit offsets for consistent spacing
+      const DESKTOP_OFFSET = 40;
+      const MOBILE_OFFSET = 40;
+
+      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+      const offset = isDesktop ? DESKTOP_OFFSET : MOBILE_OFFSET;
+
+      const targetY = rect.top + scrollTop - offset;
+
+      smoothScrollTo(Math.max(targetY, 0), 1000);
     }
   };
 

@@ -53,13 +53,13 @@ const Hero = () => {
                   animate={{ y: "0%", scale: 1, opacity: 1 }}
                   exit={{ y: "-100%", scale: 0.5, opacity: 0 }}
                   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                  className="text-primary block whitespace-nowrap font-space w-full"
+                  className="text-primary block whitespace-nowrap w-full font-sans"
                   style={{ transformOrigin: "50% 50%" }}
                 >
                   {words[index]}
                 </motion.span>
               </AnimatePresence>
-              <span className="invisible pointer-events-none opacity-0 block whitespace-nowrap">{words[index]}</span>
+              <span className="invisible pointer-events-none opacity-0 block whitespace-nowrap font-sans">{words[index]}</span>
             </span>
           </motion.h1>
           <motion.p

@@ -26,7 +26,7 @@ function App() {
       <div className="pointer-events-none fixed inset-x-0 bottom-0 h-32 z-[5] vignette-bottom" />
       <div className="pointer-events-none fixed inset-y-0 left-0 w-32 z-[5] vignette-left hidden lg:block" />
       <div className="pointer-events-none fixed inset-y-0 right-0 w-32 z-[5] vignette-right hidden lg:block" />
-      <div className="fixed bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#f8fafc] dark:from-[#050505] to-transparent z-[40] pointer-events-none lg:hidden" />
+      <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f8fafc] dark:from-[#050505] to-transparent z-[40] pointer-events-none lg:hidden" />
 
       <div className="relative z-10 max-w-7xl mx-auto mt-0 sm:mt-10 mb-0 sm:mb-16 lg:mb-24 px-4 sm:px-6 lg:px-8 rounded-none sm:rounded-3xl panel-surface overflow-hidden">
         {/* Peeking Memoji */}
@@ -44,7 +44,7 @@ function App() {
           <img
             src={memoji}
             alt="Peeking Memoji"
-            className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 object-contain drop-shadow-2xl"
+            className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 object-contain"
           />
         </motion.div>
 
