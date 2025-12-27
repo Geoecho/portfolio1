@@ -5,7 +5,7 @@ import Skills from './components/Skills';
 import Characteristics from './components/Characteristics';
 import Projects from './components/Projects';
 import DesignPhilosophy from './components/DesignPhilosophy';
-import Playground from './components/Playground';
+import Aesthetics from './components/Playground';
 import Contact from './components/Contact';
 import Navigation from './components/Navigation';
 import BackgroundIcons from './components/BackgroundIcons';
@@ -54,7 +54,7 @@ function App() {
           <Characteristics />
           <Projects />
           <DesignPhilosophy />
-          <Playground />
+          <Aesthetics />
           <Contact />
         </div>
       </div>

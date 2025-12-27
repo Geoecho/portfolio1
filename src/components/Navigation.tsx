@@ -41,7 +41,7 @@ const Navigation = () => {
     { name: 'About', href: '#characteristics' },
     { name: 'Work', href: '#projects' },
     { name: 'Philosophy', href: '#philosophy' },
-    { name: 'Playground', href: '#playground' },
+    { name: 'Aesthetics', href: '#aesthetics' },
   ];
 
   useEffect(() => {

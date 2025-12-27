@@ -65,11 +65,11 @@ const Characteristics = () => {
       <motion.div
         initial={{ opacity: 0, y: 60, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.25 }}
+        viewport={{ once: false, amount: 0.25 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div className="mb-12 sm:mb-16 text-right">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Personal Characteristics</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Characteristics</h2>
         </div>
 
         <div className="relative w-full h-auto">

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, animate } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { motion, animate, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X, ChevronDown } from 'lucide-react';
 import scribblyThumb from '../assets/scribbly-thumb.png';
 import scribbly1 from '../assets/scribbly-1.png';
 import scribbly2 from '../assets/scribbly-2.png';
@@ -10,10 +10,25 @@ import intecThumb from '../assets/intec-thumb.png';
 import intec1 from '../assets/intec-1.png';
 import intec2 from '../assets/intec-2.png';
 import intec3 from '../assets/intec-3.png';
+import cinepickThumb from '../assets/cinepick-thumb.png';
+import cinepick1 from '../assets/cinepick-1.png';
+import cinepick2 from '../assets/cinepick-2.png';
+import cinepick3 from '../assets/cinepick-3.png';
+import labThumb from '../assets/lab-thumb.png';
+import lab1 from '../assets/lab-1.png';
+import lab2 from '../assets/lab-2.png';
+import lab3 from '../assets/lab-3.png';
+import labNew1 from '../assets/lab-new-1.png';
 
 const Projects = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const mobileScrollRef = useRef<HTMLDivElement | null>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const scrollbarRef = useRef<HTMLDivElement>(null);
+  const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null);
 
   const projects = [
     {
@@ -36,17 +51,21 @@ const Projects = () => {
     },
     {
       id: 3,
-      name: 'Wup',
-      description: 'Wup is a GPS-based alarm experience designed to help users wake up or get notified based on location.',
+      name: 'Cinepick',
+      description: 'A smart movie generator app that helps users find their next favorite watch through mood-based filtering and personalized discovery.',
       longDescription:
-        'Wup is a GPS-based alarm experience designed to help users wake up or get notified based on location rather than time. Instead of relying on fixed alarms, Wup triggers alerts when the user reaches a defined place, making it useful for commuting, travel, and daily routines.'
+        'Cinepick is a mobile application designed to solve the "what should I watch" paralysis. Instead of endless scrolling, users can generate tailored movie recommendations based on their current mood, preferred genre, and specific filters like year or rating. The interface features a sleek dark mode aesthetic with vibrant accent colors, focusing on high-quality imagery and intuitive controls. It turns the passive act of searching into an engaging, interactive discovery process.',
+      image: cinepickThumb,
+      detailImages: [cinepick1, cinepick2, cinepick3]
     },
     {
       id: 4,
-      name: 'Project 4',
-      description: 'Mobile-first design where micro-interactions guide the user through a calm, focused journey.',
+      name: 'Laboratorium',
+      description: 'A visual identity for a cultural education center in Macedonia, blending industrial grit with retro-educational aesthetics.',
       longDescription:
-        'Project 4 is a mobile-first exploration where micro-interactions do the heavy lifting: guiding attention, confirming actions, and reducing cognitive load. The interface uses a simple component system with clear states, ensuring the experience remains calm even when the user moves quickly. Motion is used as feedback rather than decoration, paired with high-contrast type and touch-friendly spacing. The overall goal is a focused, frictionless journey with a premium feel.'
+        'Laboratorium is a cultural education center in Macedonia that bridges the gap between formal and informal learning. The visual identity reflects this mission by combining raw, industrial textures with a retro-educational aesthetic. Using collage-style imagery, bold typography, and a distinct red-and-black color palette, the design captures the spirit of experimentation and hands-on creativity. It’s a space where ideas are tested, and arts and crafts meet practical skills.',
+      image: labThumb,
+      detailImages: [labNew1, lab2, lab3]
     },
     {
       id: 5,
@@ -55,18 +74,11 @@ const Projects = () => {
       longDescription:
         'This dashboard concept balances dense data with breathing room, so the user can understand priority and context at a glance. I experimented with grouping patterns, spacing scales, and type weights to make the interface feel organized without feeling rigid. Subtle surface contrast and consistent borders separate modules cleanly, and the layout adapts responsively to prevent “data walls” on smaller screens. The result is a system that stays readable, scalable, and visually calm.'
     },
-    {
-      id: 6,
-      name: 'Project 6',
-      description: 'Experimental concept pushing asymmetry, layered depth, and an almost editorial presentation style.',
-      longDescription:
-        'Project 6 is an experimental layout study focused on asymmetry, layering, and editorial composition. The concept plays with rhythm—large moments of whitespace followed by dense visual emphasis—while keeping navigation and hierarchy predictable. Depth is introduced through subtle borders, controlled blur, and carefully restrained shadow. It’s an exploration in making the interface feel designed and intentional without sacrificing clarity or usability.'
-    },
   ];
 
   const selectedProject = projects.find(project => project.id === selectedProjectId) || null;
 
-  // Simple scroll handler for buttons
+  // Simple scroll handler for buttons (used on mobile)
   const scrollByAmount = (direction: 'left' | 'right') => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -91,6 +103,31 @@ const Projects = () => {
     });
   };
 
+  // Desktop scroll animation – smoother spring effect
+  const scrollByAmountAnimated = (direction: 'left' | 'right') => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const firstItem = el.querySelector<HTMLElement>('[data-project-card]');
+    const computed = window.getComputedStyle(el);
+    const gap = Number.parseFloat(computed.columnGap || computed.gap || '0') || 0;
+    const step = firstItem ? firstItem.getBoundingClientRect().width + gap : 300;
+
+    const currentScroll = el.scrollLeft;
+    const targetScroll = direction === 'left'
+      ? Math.max(0, currentScroll - step)
+      : Math.min(el.scrollWidth - el.clientWidth, currentScroll + step);
+
+    animate(currentScroll, targetScroll, {
+      type: 'spring',
+      stiffness: 120,
+      damping: 20,
+      onUpdate: (v) => {
+        el.scrollLeft = v;
+      }
+    });
+  };
+
   // Lock background scroll when a project modal is open
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -99,11 +136,129 @@ const Projects = () => {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
+      // Reset description open state when opening a new project
+      setIsDescriptionOpen(false);
+
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
   }, [selectedProjectId]);
+
+  // Sync scrollbar with container
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      // Sync scrollbar progress
+      if (!isDragging) {
+        const p = el.scrollLeft / (el.scrollWidth - el.clientWidth);
+        setScrollProgress(Math.min(1, Math.max(0, p)));
+      }
+
+      // Calculate active centered item (Mobile Only)
+      if (window.innerWidth >= 1024) {
+        setActiveProjectIndex(null);
+        return;
+      }
+
+      const containerRect = el.getBoundingClientRect();
+      const containerCenter = containerRect.left + containerRect.width / 2;
+
+      let closestIndex: number | null = null;
+      let minDiff = Infinity;
+
+      el.querySelectorAll('[data-project-card]').forEach((item, index) => {
+        const itemRect = item.getBoundingClientRect();
+        const itemCenter = itemRect.left + itemRect.width / 2;
+        const diff = Math.abs(containerCenter - itemCenter);
+
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIndex = index;
+        }
+      });
+
+      setActiveProjectIndex(closestIndex);
+    };
+
+    el.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    // Initialize on mount
+    handleScroll();
+
+    return () => {
+      el.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isDragging]);
+
+
+  // Handle dragging the scrollbar
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const bar = scrollbarRef.current;
+      const content = scrollerRef.current;
+      if (!bar || !content) return;
+
+      const rect = bar.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+      setScrollProgress(p);
+      content.scrollLeft = p * (content.scrollWidth - content.clientWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.body.style.userSelect = 'none';
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+    };
+  }, [isDragging]);
+
+  const handleScrollBarMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    // Immediate jump on click
+    const bar = scrollbarRef.current;
+    const content = scrollerRef.current;
+    if (bar && content) {
+      const rect = bar.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+      setScrollProgress(p);
+      content.scrollLeft = p * (content.scrollWidth - content.clientWidth);
+    }
+  };
+
+  // Auto-scroll when description opens/closes on mobile
+  useEffect(() => {
+    if (!mobileScrollRef.current) return;
+
+    if (isDescriptionOpen) {
+      // Scroll to bottom to show text
+      setTimeout(() => {
+        mobileScrollRef.current?.scrollTo({
+          top: mobileScrollRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 100);
+    } else {
+      // Scroll back to top to show images
+      mobileScrollRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [isDescriptionOpen]);
 
   return (
     <>
@@ -114,11 +269,11 @@ const Projects = () => {
         <motion.div
           initial={{ opacity: 0, y: 60, scale: 0.95 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, amount: 0.25 }}
+          viewport={{ once: false, amount: 0.25 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className="mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">Projects</h2>
+          <div className="mb-6 sm:mb-10">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6">Work</h2>
             <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
               Explore my projects: a testament to the art of minimal design
               meeting functionality. Witnesses to each interface is a narrative of
@@ -127,105 +282,105 @@ const Projects = () => {
           </div>
 
           <div className="pt-2">
-            <div className="hidden lg:flex justify-end mb-3">
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => scrollByAmount('left')}
-                  className="h-9 w-9 rounded-full chip-surface flex items-center justify-center transition-opacity hover:bg-black/5 dark:hover:bg-white/10"
-                  aria-label="Scroll projects left"
-                >
-                  <ChevronLeft className="h-4 w-4 text-primary" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollByAmount('right')}
-                  className="h-9 w-9 rounded-full chip-surface flex items-center justify-center transition-opacity hover:bg-black/5 dark:hover:bg-white/10"
-                  aria-label="Scroll projects right"
-                >
-                  <ChevronRight className="h-4 w-4 text-primary" />
-                </button>
-              </div>
-            </div>
+
 
             <div className="relative">
 
               <div
                 ref={scrollerRef}
-                className="overflow-x-auto overflow-y-visible pt-3 -mx-4 px-4 snap-x snap-mandatory scroll-px-6 lg:scroll-pr-16 no-scrollbar"
+                className="overflow-x-auto overflow-y-visible pt-3 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 snap-x snap-mandatory lg:snap-none no-scrollbar"
               >
                 <motion.div
-                  className="flex flex-nowrap gap-4 sm:gap-5 lg:gap-6 pb-2 pr-12 lg:pr-16"
+                  className="flex flex-nowrap gap-4 sm:gap-5 lg:gap-6 pb-2 pr-4 sm:pr-6 lg:pr-32"
                   viewport={{ once: true, margin: "-100px" }}
                 >
-                  {projects.map((project) => (
-                    <motion.button
-                      key={project.id}
-                      type="button"
-                      className="group text-left flex-shrink-0 w-[240px] sm:w-[280px] md:w-[300px] lg:w-[320px] snap-center snap-always"
-                      data-project-card
-                      onClick={() => setSelectedProjectId(project.id)}
-                      initial={{ opacity: 0.8, scale: 0.98 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4 }}
-                      viewport={{ once: false, amount: 0.6 }}
-                    >
-                      <div className="rounded-2xl card-surface card-surface-hover transition-all duration-300 overflow-hidden">
-                        <div className="relative h-40 sm:h-44 md:h-48 flex items-center justify-center">
-                          <div className="absolute inset-0 bg-white dark:bg-[#0b0b0b]" />
+                  {projects.map((project, index) => {
+                    const isActive = activeProjectIndex === index;
+                    return (
+                      <motion.button
+                        key={project.id}
+                        type="button"
+                        className="group text-left flex-shrink-0 w-[240px] sm:w-[280px] md:w-[300px] lg:w-[320px] snap-center snap-always"
+                        data-project-card
+                        onClick={() => setSelectedProjectId(project.id)}
+                        initial={{ opacity: 0.8, scale: 0.98 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4 }}
+                        viewport={{ once: false, amount: 0.6 }}
+                      >
+                        <div className={`rounded-2xl card-surface transition-all duration-300 overflow-hidden ${isActive ? 'border-primary ring-1 ring-primary' : 'card-surface-hover lg:hover:border-primary/50'}`}>
+                          <div className="relative h-40 sm:h-44 md:h-48 flex items-center justify-center">
+                            <div className="absolute inset-0 bg-white dark:bg-[#0b0b0b]" />
 
-                          {/* Project Image or Fallback Pattern */}
-                          {(project as any).image ? (
-                            <div className="absolute inset-0 p-3 sm:p-4">
-                              <div className="w-full h-full relative rounded-lg overflow-hidden">
-                                <img
-                                  src={(project as any).image}
-                                  alt={project.name}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="absolute inset-0 opacity-15 pointer-events-none">
-                                <svg className="w-full h-full" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                  <defs>
-                                    <pattern id={`grid-${project.id}`} width="24" height="24" patternUnits="userSpaceOnUse">
-                                      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-theme-primary/40" />
-                                    </pattern>
-                                  </defs>
-                                  <rect width="100%" height="100%" fill={`url(#grid-${project.id})`} />
-                                </svg>
-                              </div>
-
-                              <div className="relative z-10">
-                                <div className="w-14 h-14 rounded-xl bg-white/90 dark:bg-black/40 border border-black/10 dark:border-white/10 flex items-center justify-center transition-colors duration-300">
-                                  <div className="w-6 h-6 rounded bg-primary/20 group-hover:bg-primary/30 transition-colors duration-300" />
+                            {/* Project Image or Fallback Pattern */}
+                            {(project as any).image ? (
+                              <div className="absolute inset-0 p-3 sm:p-4">
+                                <div className="w-full h-full relative rounded-lg overflow-hidden">
+                                  <img
+                                    src={(project as any).image}
+                                    alt={project.name}
+                                    className="w-full h-full object-contain"
+                                  />
                                 </div>
                               </div>
-                            </>
-                          )}
+                            ) : (
+                              <>
+                                <div className="absolute inset-0 opacity-15 pointer-events-none">
+                                  <svg className="w-full h-full" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                      <pattern id={`grid-${project.id}`} width="24" height="24" patternUnits="userSpaceOnUse">
+                                        <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-theme-primary/40" />
+                                      </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill={`url(#grid-${project.id})`} />
+                                  </svg>
+                                </div>
 
-                          <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden rounded-tr-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="absolute top-0 right-0 w-px h-6 bg-gradient-to-b from-primary/30 to-transparent" />
-                            <div className="absolute top-0 right-0 w-6 h-px bg-gradient-to-l from-primary/30 to-transparent" />
+                                <div className="relative z-10">
+                                  <div className="w-14 h-14 rounded-xl bg-white/90 dark:bg-black/40 border border-black/10 dark:border-white/10 flex items-center justify-center transition-colors duration-300">
+                                    <div className="w-6 h-6 rounded bg-primary/20 group-hover:bg-primary/30 transition-colors duration-300" />
+                                  </div>
+                                </div>
+                              </>
+                            )}
+
+                            <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden rounded-tr-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="absolute top-0 right-0 w-px h-6 bg-gradient-to-b from-primary/30 to-transparent" />
+                              <div className="absolute top-0 right-0 w-6 h-px bg-gradient-to-l from-primary/30 to-transparent" />
+                            </div>
+                          </div>
+
+                          <div className="p-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <h3 className={`text-lg font-semibold transition-colors duration-300 ${isActive ? 'text-primary' : 'text-theme-primary group-hover:text-primary'}`}>
+                                {project.name}
+                              </h3>
+                            </div>
+                            <p className="mt-2 text-sm text-muted leading-relaxed line-clamp-3">
+                              {project.description}
+                            </p>
                           </div>
                         </div>
-
-                        <div className="p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <h3 className="text-lg font-semibold text-theme-primary group-hover:text-primary transition-colors duration-300">
-                              {project.name}
-                            </h3>
-                          </div>
-                          <p className="mt-2 text-sm text-muted leading-relaxed line-clamp-3">
-                            {project.description}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
+                      </motion.button>
+                    );
+                  })}
                 </motion.div>
+              </div>
+
+              {/* Desktop Scrollbar (Bottom) */}
+              <div className="hidden lg:flex flex-col w-full mt-8 px-1 gap-2">
+                <span className="text-[10px] text-muted uppercase tracking-widest font-medium ml-1">Drag to Scroll</span>
+                <div
+                  ref={scrollbarRef}
+                  className="w-full h-2.5 bg-black/5 dark:bg-white/10 rounded-full cursor-pointer relative group overflow-hidden"
+                  onMouseDown={handleScrollBarMouseDown}
+                >
+                  <motion.div
+                    className="absolute top-0 left-0 h-full bg-primary rounded-full"
+                    style={{ width: '25%', left: `${scrollProgress * 75}%` }}
+                    transition={{ duration: 0 }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -242,8 +397,9 @@ const Projects = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="relative w-full max-w-5xl h-[85vh] panel-surface rounded-3xl overflow-hidden shadow-2xl z-[61] flex flex-col"
+            className="relative w-full max-w-5xl h-auto max-h-[85vh] lg:h-[85vh] panel-surface rounded-3xl overflow-hidden shadow-2xl z-[61] flex flex-col"
           >
+            {/* Mobile Header (Visible only on small screens) */}
             {/* Mobile Header (Visible only on small screens) */}
             <div className="lg:hidden flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10 bg-white dark:bg-[#0b0b0b] z-20 sticky top-0">
               <h3 className="text-lg font-semibold">{selectedProject.name}</h3>
@@ -257,12 +413,23 @@ const Projects = () => {
             </div>
 
             {/* Scrollable Content Wrapper */}
-            <div className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
+            <div
+              ref={mobileScrollRef}
+              className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row"
+            >
 
               {/* Left Panel: Scrollable Images */}
               <div className="w-full lg:flex-1 relative lg:overflow-hidden flex flex-col bg-black/5 dark:bg-black/20">
+
+                {/* Mobile Swipe Indicator (Static at top) */}
+                <div className="lg:hidden w-full flex items-center justify-between px-4 py-2 z-10 mt-2 pointer-events-none">
+                  <ChevronLeft className="w-4 h-4 text-muted" />
+                  <span className="uppercase tracking-widest text-xs font-medium text-muted">Swipe to view</span>
+                  <ChevronRight className="w-4 h-4 text-muted" />
+                </div>
+
                 <div className="w-full flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto no-scrollbar relative snap-x snap-mandatory">
-                  <div className="flex flex-row lg:flex-col p-4 sm:p-6 lg:p-8 gap-4 lg:gap-6 items-start lg:items-center">
+                  <div className="flex flex-row lg:flex-col p-4 sm:p-6 lg:p-8 gap-2 lg:gap-6 items-start lg:items-center">
                     {[0, 1, 2].map((slot) => {
                       const hasImage = (selectedProject as any).detailImages && (selectedProject as any).detailImages[slot];
                       return (
@@ -300,19 +467,40 @@ const Projects = () => {
                   </div>
                 </div>
 
-                {/* Mobile Swipe Indicator Overlay */}
-                {/* Mobile Swipe Indicator (Inline, below images) */}
-                <div className="lg:hidden w-full flex justify-center px-4 pb-4 pointer-events-none">
-                  <div className="w-full bg-white dark:bg-[#1a1a1a] py-3 rounded-xl flex items-center justify-between px-4 text-xs font-medium border border-black/5 dark:border-white/10 shadow-sm">
-                    <ChevronLeft className="w-4 h-4 text-muted" />
-                    <span className="uppercase tracking-widest text-muted">Swipe to view</span>
-                    <ChevronRight className="w-4 h-4 text-muted" />
-                  </div>
-                </div>
               </div>
 
-              {/* Right Panel: Content (Scrollable with parent on mobile) */}
-              <div className="w-full lg:w-[420px] xl:w-[480px] bg-inherit lg:border-l border-black/10 dark:border-white/10 flex flex-col h-auto lg:h-full overflow-visible">
+              {/* Mobile Read More Button (Fixed at bottom) */}
+              <div className="lg:hidden w-full flex flex-col gap-3 px-4 pb-4 mt-auto z-[60] relative">
+                <button
+                  type="button"
+                  onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
+                  className="w-full bg-white dark:bg-[#1a1a1a] py-3 rounded-xl flex items-center justify-center gap-2 text-xs font-medium border border-black/5 dark:border-white/10 shadow-sm transition-colors active:scale-[0.98]"
+                >
+                  <span className="uppercase tracking-widest text-muted">{isDescriptionOpen ? 'Read less' : 'Read more'}</span>
+                  <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-300 ${isDescriptionOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isDescriptionOpen && (
+                    <motion.div
+                      initial={{ height: -5, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      className="overflow-hidden bg-white dark:bg-[#1a1a1a] rounded-xl border border-black/5 dark:border-white/10 shadow-sm"
+                    >
+                      <div className="p-4">
+                        <p className="text-muted leading-relaxed text-sm">
+                          {selectedProject.longDescription ?? selectedProject.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Right Panel: Content (Scrollable with parent on mobile) - Hidden on mobile now as it is in dropdown */}
+              <div className="hidden lg:flex w-full lg:w-[420px] xl:w-[480px] bg-inherit lg:border-l border-black/10 dark:border-white/10 flex-col h-auto lg:h-full overflow-visible">
                 <div className="p-6 sm:p-8 lg:p-10 h-full flex flex-col">
 
                   {/* Desktop Header */}
@@ -339,8 +527,8 @@ const Projects = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
-        </div>,
+          </motion.div >
+        </div >,
         document.body
       )}
     </>
