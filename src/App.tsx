@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import memoji from './assets/memoji.png';
 import Hero from './components/Hero';
@@ -14,6 +15,16 @@ import CustomCursor from './components/CustomCursor';
 
 function App() {
   useLenis();
+
+  // Force scroll to top on mount/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Optional: if using browser history restoration, we might need to disable it
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+  }, []);
+
   return (
     <div className="min-h-screen text-theme-primary selection:bg-primary selection:text-white overflow-hidden">
       <CustomCursor />

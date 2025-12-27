@@ -31,8 +31,8 @@ const Navigation = () => {
       return storedTheme;
     }
 
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
+    // Default to dark if no preference is stored
+    return 'dark';
   });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -86,11 +86,11 @@ const Navigation = () => {
     root.classList.add(theme);
 
     // Enforce theme color by replacing any existing tags
-    document.querySelectorAll('meta[name="theme-color"]').forEach(el => el.remove());
-    const meta = document.createElement('meta');
-    meta.name = 'theme-color';
-    meta.content = theme === 'dark' ? '#141414' : '#ffffff';
-    document.head.appendChild(meta);
+    // Enforce theme color by updating the existing tag
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content', theme === 'dark' ? '#050505' : '#ffffff');
+    }
 
     localStorage.setItem('theme', theme);
   }, [theme]);

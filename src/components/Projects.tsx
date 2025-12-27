@@ -271,18 +271,18 @@ const Projects = () => {
                         transition={{ duration: 0.4 }}
                         viewport={{ once: false, amount: 0.6 }}
                       >
-                        <div className={`rounded-2xl card-surface transition-all duration-300 overflow-hidden ${isActive ? 'border-primary ring-1 ring-primary' : 'card-surface-hover lg:hover:border-primary/50'}`}>
+                        <div className={`group rounded-2xl card-surface transition-all duration-300 overflow-hidden ${isActive ? 'border-primary ring-1 ring-primary' : 'card-surface-hover lg:hover:border-primary/50'}`}>
                           <div className="relative h-40 sm:h-44 md:h-48 flex items-center justify-center">
                             <div className="absolute inset-0 bg-white dark:bg-[#0b0b0b]" />
 
                             {/* Project Image or Fallback Pattern */}
                             {(project as any).image ? (
                               <div className="absolute inset-0 p-3 sm:p-4">
-                                <div className="w-full h-full relative rounded-lg overflow-hidden">
+                                <div className="w-full h-full relative rounded-lg overflow-hidden flex items-center justify-center">
                                   <img
                                     src={(project as any).image}
                                     alt={project.name}
-                                    className="w-full h-full object-contain"
+                                    className="w-[80%] h-[80%] object-contain transition-transform duration-500 group-hover:scale-110"
                                   />
                                 </div>
                               </div>
@@ -339,7 +339,7 @@ const Projects = () => {
 
               {/* Desktop Scrollbar (Bottom) */}
               <div className="hidden lg:flex flex-col w-full mt-8 px-1 gap-2">
-                <span className="text-[10px] text-muted uppercase tracking-widest font-medium ml-1">Drag to Scroll</span>
+                <span className="text-[10px] text-muted uppercase tracking-widest font-medium ml-1">Drag to Scroll or Shift + Mouse Scroll</span>
                 <div
                   ref={scrollbarRef}
                   className="w-full h-2.5 bg-black/5 dark:bg-white/10 rounded-full cursor-pointer relative group overflow-hidden"
@@ -398,7 +398,15 @@ const Projects = () => {
                   <ChevronRight className="w-4 h-4 text-muted" />
                 </div>
 
-                <div className="w-full flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto no-scrollbar relative snap-x snap-mandatory">
+                <div
+                  className="w-full flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto no-scrollbar relative snap-x snap-mandatory"
+                  ref={(node) => {
+                    if (node) {
+                      // Reset horizontal scroll to start whenever this mounts/updates
+                      node.scrollLeft = 0;
+                    }
+                  }}
+                >
                   <div className="flex flex-row lg:flex-col p-4 sm:p-6 lg:p-8 gap-2 lg:gap-6 items-start lg:items-center">
                     {[0, 1, 2].map((slot) => {
                       const hasImage = (selectedProject as any).detailImages && (selectedProject as any).detailImages[slot];
