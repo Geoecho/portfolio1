@@ -282,7 +282,7 @@ const Projects = () => {
                                   <img
                                     src={(project as any).image}
                                     alt={project.name}
-                                    className="w-[80%] h-[80%] object-contain transition-transform duration-500 group-hover:scale-110"
+                                    className="w-[100%] h-[100%] object-contain transition-transform duration-500 group-hover:scale-125 hover:rotate-3"
                                   />
                                 </div>
                               </div>
@@ -339,10 +339,10 @@ const Projects = () => {
 
               {/* Desktop Scrollbar (Bottom) */}
               <div className="hidden lg:flex flex-col w-full mt-8 px-1 gap-2">
-                <span className="text-[10px] text-muted uppercase tracking-widest font-medium ml-1">Drag to Scroll or Shift + Mouse Scroll</span>
+                <span className="text-[10px] text-muted uppercase tracking-widest font-medium ml-1">Drag to Scroll <span className='italic'>or</span> Shift + Mouse Scroll</span>
                 <div
                   ref={scrollbarRef}
-                  className="w-full h-2.5 bg-black/5 dark:bg-white/10 rounded-full cursor-pointer relative group overflow-hidden"
+                  className="w-full h-3 bg-black/5 dark:bg-white/10 rounded-full cursor-pointer relative group overflow-hidden"
                   onMouseDown={handleScrollBarMouseDown}
                 >
                   <motion.div
