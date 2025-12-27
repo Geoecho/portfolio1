@@ -119,7 +119,7 @@ const Skills = () => {
         <div className="mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">Technical Skills</h2>
           <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
-            My proficiency in design tools has evolved into a robust skillset.
+            My proficiency in tools has evolved into a robust skillset.
             Over the years, I've transitioned from traditional image editing to
             mastering modern UI/UX workflows, with <span className="font-bold text-primary">Figma</span> becoming my primary driver.
           </p>

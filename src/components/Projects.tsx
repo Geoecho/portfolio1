@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, animate, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, ChevronDown } from 'lucide-react';
 import scribblyThumb from '../assets/scribbly-thumb.png';
 import scribbly1 from '../assets/scribbly-1.png';
@@ -15,10 +15,15 @@ import cinepick1 from '../assets/cinepick-1.png';
 import cinepick2 from '../assets/cinepick-2.png';
 import cinepick3 from '../assets/cinepick-3.png';
 import labThumb from '../assets/lab-thumb.png';
-import lab1 from '../assets/lab-1.png';
+
 import lab2 from '../assets/lab-2.png';
 import lab3 from '../assets/lab-3.png';
+
 import labNew1 from '../assets/lab-new-1.png';
+import hootlinkThumb from '../assets/hootlink-thumb.png';
+import hootlink1 from '../assets/hootlink-1.png';
+import hootlink2 from '../assets/hootlink-2.png';
+import hootlink3 from '../assets/hootlink-3.png';
 
 const Projects = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
@@ -38,7 +43,8 @@ const Projects = () => {
       longDescription:
         'The InTec System redesign transforms a standard corporate presence into a modern, conversion-focused platform. The goal was to simplify the user journey for complex IT services like virtualization and system integration. By utilizing a clean, card-based layout with generous whitespace and a confident blue color system, the design guides decision-makers clearly from problem to solution. Key trusted partners like VMware and Cisco are highlighted to build immediate credibility, while the responsive "Ideas Made Digital" section ensures the message resonates across all devices.',
       image: intecThumb,
-      detailImages: [intec3, intec1, intec2]
+      detailImages: [intec3, intec1, intec2],
+      category: 'Website Design'
     },
     {
       id: 2,
@@ -47,7 +53,8 @@ const Projects = () => {
       longDescription:
         'Scribbly is a playful sketching concept built for speed and experimentation. The UI stays out of the way so the canvas always feels “ready,” with tools surfaced only when needed. I explored a minimal control system, strong empty-space composition, and expressive visual feedback for strokes and states. The concept is aimed at quick ideation: sketch, iterate, and export without the typical complexity that slows creative flow.',
       image: scribblyThumb,
-      detailImages: [scribbly1, scribbly2, scribbly3]
+      detailImages: [scribbly1, scribbly2, scribbly3],
+      category: 'App Design'
     },
     {
       id: 3,
@@ -56,7 +63,8 @@ const Projects = () => {
       longDescription:
         'Cinepick is a mobile application designed to solve the "what should I watch" paralysis. Instead of endless scrolling, users can generate tailored movie recommendations based on their current mood, preferred genre, and specific filters like year or rating. The interface features a sleek dark mode aesthetic with vibrant accent colors, focusing on high-quality imagery and intuitive controls. It turns the passive act of searching into an engaging, interactive discovery process.',
       image: cinepickThumb,
-      detailImages: [cinepick1, cinepick2, cinepick3]
+      detailImages: [cinepick1, cinepick2, cinepick3],
+      category: 'App Design'
     },
     {
       id: 4,
@@ -65,68 +73,24 @@ const Projects = () => {
       longDescription:
         'Laboratorium is a cultural education center in Macedonia that bridges the gap between formal and informal learning. The visual identity reflects this mission by combining raw, industrial textures with a retro-educational aesthetic. Using collage-style imagery, bold typography, and a distinct red-and-black color palette, the design captures the spirit of experimentation and hands-on creativity. It’s a space where ideas are tested, and arts and crafts meet practical skills.',
       image: labThumb,
-      detailImages: [labNew1, lab2, lab3]
+      detailImages: [labNew1, lab2, lab3],
+      category: 'Visual Identity'
     },
     {
       id: 5,
-      name: 'Project 5',
-      description: 'Dashboard exploration balancing dense information, breathing room, and strong typographic rhythm.',
+      name: 'Hootlink',
+      description: 'A friendly login flow design featuring a playful owl mascot that reacts to user interaction.',
       longDescription:
-        'This dashboard concept balances dense data with breathing room, so the user can understand priority and context at a glance. I experimented with grouping patterns, spacing scales, and type weights to make the interface feel organized without feeling rigid. Subtle surface contrast and consistent borders separate modules cleanly, and the layout adapts responsively to prevent “data walls” on smaller screens. The result is a system that stays readable, scalable, and visually calm.'
+        'Hootlink is an exploration into emotional design for utility screens. The goal was to transform a standard login process into a moment of delight. The owl mascot serves as a friendly guide, reacting in real-time—peeking when you type your email and covering its eyes when you enter your password. This conceptual flow demonstrates how micro-interactions and character design can build brand affection even in the most functional parts of an application.',
+      image: hootlinkThumb,
+      detailImages: [hootlink1, hootlink2, hootlink3],
+      category: 'Interaction Design'
     },
   ];
 
   const selectedProject = projects.find(project => project.id === selectedProjectId) || null;
 
-  // Simple scroll handler for buttons (used on mobile)
-  const scrollByAmount = (direction: 'left' | 'right') => {
-    const el = scrollerRef.current;
-    if (!el) return;
 
-    const firstItem = el.querySelector<HTMLElement>('[data-project-card]');
-    const computed = window.getComputedStyle(el);
-    const gap = Number.parseFloat(computed.columnGap || computed.gap || '0') || 0;
-    const step = firstItem ? firstItem.getBoundingClientRect().width + gap : 300;
-
-    const currentScroll = el.scrollLeft;
-    const targetScroll = direction === 'left'
-      ? Math.max(0, currentScroll - step)
-      : Math.min(el.scrollWidth - el.clientWidth, currentScroll + step);
-
-    animate(currentScroll, targetScroll, {
-      type: 'tween',
-      ease: 'easeOut',
-      duration: 0.6,
-      onUpdate: (v) => {
-        el.scrollLeft = v;
-      }
-    });
-  };
-
-  // Desktop scroll animation – smoother spring effect
-  const scrollByAmountAnimated = (direction: 'left' | 'right') => {
-    const el = scrollerRef.current;
-    if (!el) return;
-
-    const firstItem = el.querySelector<HTMLElement>('[data-project-card]');
-    const computed = window.getComputedStyle(el);
-    const gap = Number.parseFloat(computed.columnGap || computed.gap || '0') || 0;
-    const step = firstItem ? firstItem.getBoundingClientRect().width + gap : 300;
-
-    const currentScroll = el.scrollLeft;
-    const targetScroll = direction === 'left'
-      ? Math.max(0, currentScroll - step)
-      : Math.min(el.scrollWidth - el.clientWidth, currentScroll + step);
-
-    animate(currentScroll, targetScroll, {
-      type: 'spring',
-      stiffness: 120,
-      damping: 20,
-      onUpdate: (v) => {
-        el.scrollLeft = v;
-      }
-    });
-  };
 
   // Lock background scroll when a project modal is open
   useEffect(() => {
@@ -276,8 +240,7 @@ const Projects = () => {
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">Work</h2>
             <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
               Explore my projects: a testament to the art of minimal design
-              meeting functionality. Witnesses to each interface is a narrative of
-              simplicity and purpose, where every element serves a purpose.
+              meeting functionality.
             </p>
           </div>
 
@@ -351,10 +314,17 @@ const Projects = () => {
                           </div>
 
                           <div className="p-4">
-                            <div className="flex items-start justify-between gap-3">
-                              <h3 className={`text-lg font-semibold transition-colors duration-300 ${isActive ? 'text-primary' : 'text-theme-primary group-hover:text-primary'}`}>
-                                {project.name}
-                              </h3>
+                            <div className="flex flex-col gap-2 mb-1">
+                              <div className="w-fit px-2 py-1 rounded-full bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/5 backdrop-blur-sm">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted block">
+                                  {project.category}
+                                </span>
+                              </div>
+                              <div className="flex items-start justify-between gap-3">
+                                <h3 className={`text-lg font-bold transition-colors duration-300 ${isActive ? 'text-primary' : 'text-theme-primary group-hover:text-primary'}`}>
+                                  {project.name}
+                                </h3>
+                              </div>
                             </div>
                             <p className="mt-2 text-sm text-muted leading-relaxed line-clamp-3">
                               {project.description}

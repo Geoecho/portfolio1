@@ -17,31 +17,33 @@ const Contact = () => {
     setErrorMessage(null);
 
     try {
-      const response = await fetch('/api/send-email', {
+      // Create the payload for Web3Forms
+      // IMPORTANT: You need to obtain an Access Key from https://web3forms.com/
+      // and replace 'YOUR_ACCESS_KEY_HERE' below.
+      const payload = {
+        access_key: 'd6cbadbf-da77-4dc1-9315-6db51265b7f0',
+        email,
+        subject: heading, // Map 'heading' to 'subject' for clarity in email
+        message,
+        from_name: 'Portfolio Contact Form',
+        botcheck: false, // Hidden field to prevent spam
+      };
+
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ email, heading, message }),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        let serverError = '';
-        try {
-          const data = await response.json();
-          serverError = typeof data?.error === 'string' ? data.error : '';
-        } catch {
-          // ignore
-        }
+      const data = await response.json();
 
-        const hint =
-          response.status === 404
-            ? 'Email API not running locally. Deploy (Vercel/Netlify) or run the API dev server.'
-            : '';
-
-        setErrorMessage(serverError || hint || 'Failed to send. Try again.');
+      if (!data.success) {
+        setErrorMessage(data.message || 'Failed to send. Try again.');
         setStatus('error');
-        setTimeout(() => setStatus('idle'), 2000);
+        setTimeout(() => setStatus('idle'), 3000);
         return;
       }
 
@@ -53,12 +55,12 @@ const Contact = () => {
 
       setTimeout(() => {
         setStatus('idle');
-      }, 2500);
+      }, 3000);
     } catch (error) {
       console.error('Error sending email', error);
       setErrorMessage('Network error. Check your connection and try again.');
       setStatus('error');
-      setTimeout(() => setStatus('idle'), 2000);
+      setTimeout(() => setStatus('idle'), 3000);
     }
   };
 

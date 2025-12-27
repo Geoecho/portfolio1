@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Layers, Zap, Target } from 'lucide-react';
+import { Sparkles, Layers, Zap } from 'lucide-react';
 
 
 const DesignPhilosophy = () => {
@@ -64,11 +64,6 @@ const DesignPhilosophy = () => {
       icon: Zap,
       title: 'Intentional Motion',
       description: 'Animation reveals relationships. Movement should feel natural, never arbitrary.',
-    },
-    {
-      icon: Target,
-      title: 'User-Centered',
-      description: 'Design serves people, not aesthetics. Beauty emerges from solving real problems.',
     },
   ];
 

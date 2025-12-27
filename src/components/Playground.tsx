@@ -102,7 +102,7 @@ const Aesthetics = () => {
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">Aesthetics</h2>
           <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
             Design isn't just about problem-solving; it's about feeling.
-            These are the visual principles and patterns that I enjoy exploring—my signature creative playground.
+            These are the visual principles and patterns that I enjoy exploring.
           </p>
         </div>
 

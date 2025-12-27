@@ -66,7 +66,7 @@ const Hero = () => {
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
             className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-700 dark:text-slate-200 mb-8"
           >
-            Crafting intuitive interfaces for modern web & mobile products.
+            Crafting intuitive interfaces for modern <span className="font-bold text-primary">web & mobile</span> products.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
