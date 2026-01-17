@@ -16,7 +16,7 @@ const Hero = () => {
   return (
     <motion.section
       id="intro"
-      className="min-h-screen relative flex items-center overflow-hidden py-16 sm:py-[60px]"
+      className="relative flex items-center overflow-hidden pt-40 pb-12 sm:pt-52 sm:pb-20"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}

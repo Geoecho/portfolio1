@@ -59,7 +59,7 @@ function App() {
           />
         </motion.div>
 
-        <div className="space-y-16 sm:space-y-[60px]">
+        <div className="space-y-8 sm:space-y-12">
           <Hero />
           <Skills />
           <Characteristics />

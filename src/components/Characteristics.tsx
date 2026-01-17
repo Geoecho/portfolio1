@@ -68,7 +68,7 @@ const Characteristics = () => {
         viewport={{ once: false, amount: 0.25 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="mb-12 sm:mb-16 text-right">
+        <div className="mb-12 sm:mb-16 text-left">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">Characteristics</h2>
         </div>
 

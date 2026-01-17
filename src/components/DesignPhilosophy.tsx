@@ -78,13 +78,13 @@ const DesignPhilosophy = () => {
         viewport={{ once: false, amount: 0.25 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="mb-12 sm:mb-16 text-right">
+        <div className="mb-12 sm:mb-16 text-left">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">Design Philosophy</h2>
-          <p className="text-muted text-base sm:text-lg max-w-2xl ml-auto leading-relaxed">
+          <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
             My approach to design is rooted in clarity, intention, and empathy.
             These principles guide every decision, from the first sketch to the final pixel.
           </p>
-          <p className="mt-6 text-muted italic text-sm sm:text-base max-w-2xl ml-auto">
+          <p className="mt-6 text-muted italic text-sm sm:text-base max-w-2xl">
             "Good design is as little design as possible."
             <span className="block mt-2 text-muted not-italic text-xs">— Dieter Rams</span>
           </p>

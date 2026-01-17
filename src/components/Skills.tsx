@@ -107,13 +107,13 @@ const Skills = () => {
   return (
     <section
       id="skills"
-      className="py-16 sm:py-[60px] relative overflow-hidden scroll-mt-[40px]"
+      className="pt-2 pb-16 sm:pt-4 sm:pb-[60px] relative overflow-hidden scroll-mt-[40px]"
     >
       <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.95 }}
+        initial={{ opacity: 0, y: 60, scale: 0.9 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: false, amount: 0.25 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        viewport={{ once: false, amount: 0.6 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         {/* Header Section - Matching Projects/Characteristics style */}
         <div className="mb-12 sm:mb-16">
@@ -126,40 +126,47 @@ const Skills = () => {
         </div>
 
         <div className="relative -mx-4 sm:-mx-6 lg:-mx-8">
+          <div className="relative w-full overflow-hidden">
+            <div className="flex relative">
+              <motion.div
+                className="flex gap-4 sm:gap-6 pr-4 sm:pr-6"
+                animate={{ x: ['-50%', '0%'] }}
+                transition={{
+                  duration: 30,
+                  ease: 'linear',
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+                style={{ width: "fit-content" }}
+              >
+                {[...skillsData, ...skillsData].map((skill, idx) => {
+                  const SkillIcon = skill.icon;
+                  // Use a unique key based on original index and duplicate set
+                  return (
+                    <div
+                      key={`${skill.name}-${idx}`}
+                      className="w-[280px] sm:w-[320px] flex-shrink-0 flex items-center gap-4 p-4 rounded-2xl card-surface border border-black/5 dark:border-white/5"
+                    >
+                      <div className="h-12 w-12 shrink-0 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                        {skill.isSvg ? (
+                          <SkillIcon className="h-6 w-6" aria-hidden="true" />
+                        ) : (
+                          <SkillIcon className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
+                        )}
+                      </div>
 
-          <div className="overflow-x-auto overflow-y-hidden px-4 sm:px-6 lg:px-8 pb-4 snap-x snap-mandatory scroll-px-4 sm:scroll-px-6 lg:scroll-px-8 no-scrollbar">
-            <div className="grid grid-rows-2 grid-flow-col lg:grid-rows-none lg:grid-flow-row lg:grid-cols-3 gap-4 min-w-max lg:min-w-0 pr-8 sm:pr-10 lg:pr-0">
-              {skillsData.map((skill, idx) => {
-                // Simpler card design
-                const SkillIcon = skill.icon;
-                return (
-                  <motion.div
-                    key={skill.name}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.4, delay: idx * 0.05 }}
-                    className="w-[280px] sm:w-[320px] lg:w-full flex items-center gap-4 p-4 rounded-2xl card-surface border border-black/5 dark:border-white/5"
-                  >
-                    <div className="h-12 w-12 shrink-0 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                      {skill.isSvg ? (
-                        <SkillIcon className="h-6 w-6" aria-hidden="true" />
-                      ) : (
-                        <SkillIcon className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
-                      )}
-                    </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base font-semibold text-theme-primary">{skill.name}</h3>
+                        <p className="text-sm text-muted/80 truncate">{skill.type}</p>
+                      </div>
 
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-semibold text-theme-primary">{skill.name}</h3>
-                      <p className="text-sm text-muted/80 truncate">{skill.type}</p>
+                      <div className="px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 text-xs font-medium text-muted">
+                        {skill.level}/5
+                      </div>
                     </div>
-
-                    <div className="px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 text-xs font-medium text-muted">
-                      {skill.level}/5
-                    </div>
-                  </motion.div>
-                );
-              })}
+                  );
+                })}
+              </motion.div>
             </div>
           </div>
         </div>
