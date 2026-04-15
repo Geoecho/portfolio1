@@ -322,6 +322,20 @@ const Projects = () => {
 
           <div className="pt-2">
 
+            {/* Mobile scroll dots */}
+            <div className="flex lg:hidden justify-center gap-1.5 mb-4">
+              {projects.map((_, index) => (
+                <motion.div
+                  key={index}
+                  animate={{
+                    width: activeProjectIndex === index ? 20 : 6,
+                    opacity: activeProjectIndex === index ? 1 : 0.3,
+                  }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="h-1.5 rounded-full bg-primary"
+                />
+              ))}
+            </div>
 
             <div className="relative">
 
