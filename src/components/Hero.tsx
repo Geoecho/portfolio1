@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Dribbble, Instagram, Linkedin } from 'lucide-react';
 
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], delay },
+});
+
 const Hero = () => {
   const words = ["right.", "intuitive.", "effortless.", "natural."];
   const [index, setIndex] = useState(0);
@@ -14,32 +20,15 @@ const Hero = () => {
   }, []);
 
   return (
-    <motion.section
+    <section
       id="intro"
       className="relative flex items-center overflow-hidden pt-40 pb-12 sm:pt-52 sm:pb-20"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
     >
-
-
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10 h-full">
-        {/* Centered Text Content with fade-in from top */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-12 z-20 text-center"
-        >
-
-
-          {/* Centered Text Content with fade-in from top */}
-
+        <div className="lg:col-span-12 z-20 text-center">
 
           <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
+            {...fadeUp(0)}
             className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold mb-6 leading-tight tracking-tight flex flex-col gap-2 w-full items-center"
           >
             <span className="text-center">Designs that feel</span>
@@ -47,12 +36,11 @@ const Hero = () => {
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
                   key={words[index]}
-                  initial={{ y: "100%", scale: 0.5, opacity: 0 }}
-                  animate={{ y: "0%", scale: 1, opacity: 1 }}
-                  exit={{ y: "-100%", scale: 0.5, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  exit={{ y: "-100%", opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 140, damping: 22 }}
                   className="text-primary block whitespace-nowrap w-full font-sans"
-                  style={{ transformOrigin: "50% 50%" }}
                 >
                   {words[index]}
                 </motion.span>
@@ -60,36 +48,31 @@ const Hero = () => {
               <span className="invisible pointer-events-none opacity-0 block whitespace-nowrap font-sans">{words[index]}</span>
             </span>
           </motion.h1>
+
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
+            {...fadeUp(0.1)}
             className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-700 dark:text-slate-200 mb-8"
           >
             Crafting intuitive interfaces for modern <span className="font-bold text-primary">web & mobile</span> products.
           </motion.p>
+
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut', delay: 0.25 }}
+            {...fadeUp(0.18)}
             className="text-muted text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Greetings! I'm Hristijan, a passionate 26-year-old UI/UX designer based in the city of Skopje, Macedonia.
             I approach design through balance, aligning structure with creative flexibility.
           </motion.p>
 
-          {/* Social Icons - Desktop Layout */}
-          <SocialIcons className="hidden lg:flex justify-center gap-8 items-center" delay={0.2} />
-        </motion.div>
-
-
+          <SocialIcons className="hidden lg:flex justify-center gap-8 items-center" delay={0.25} />
+        </div>
       </div>
 
-      {/* Social Icons - Mobile Layout (Absolute Top Left of Screen) */}
+      {/* Social Icons - Mobile Layout */}
       <div className="absolute top-6 left-0 z-50 lg:hidden">
-        <SocialIcons className="flex gap-6 items-center" delay={0.2} />
+        <SocialIcons className="flex gap-6 items-center" delay={0.25} />
       </div>
-    </motion.section>
+    </section>
   );
 };
 
@@ -100,7 +83,7 @@ const SocialIcons = ({ className, delay }: { className?: string, delay: number }
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: 'easeOut', delay }}
+      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], delay }}
       className={className}
     >
       <motion.a

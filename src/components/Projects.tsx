@@ -6,10 +6,6 @@ import scribblyThumb from '../assets/scribbly-thumb.png';
 import scribbly1 from '../assets/scribbly-1.png';
 import scribbly2 from '../assets/scribbly-2.png';
 import scribbly3 from '../assets/scribbly-3.png';
-import intecThumb from '../assets/intec-thumb.png';
-import intec1 from '../assets/intec-1.png';
-import intec2 from '../assets/intec-2.png';
-import intec3 from '../assets/intec-3.png';
 import cinepickThumb from '../assets/cinepick-thumb.png';
 import cinepick1 from '../assets/cinepick-1.png';
 import cinepick2 from '../assets/cinepick-2.png';
@@ -24,6 +20,14 @@ import hootlinkThumb from '../assets/hootlink-thumb.png';
 import hootlink1 from '../assets/hootlink-1.png';
 import hootlink2 from '../assets/hootlink-2.png';
 import hootlink3 from '../assets/hootlink-3.png';
+import intecNewThumb from '../assets/intec-new-thumb.png';
+import intecNew1 from '../assets/intec-new-1.png';
+import intecNew2 from '../assets/intec-new-2.png';
+
+import gridlineThumb from '../assets/gridline-thumb.png';
+import gridline1 from '../assets/gridline-1.png';
+import gridline2 from '../assets/gridline-2.png';
+import gridline3 from '../assets/gridline-3.png';
 
 const Projects = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
@@ -37,21 +41,35 @@ const Projects = () => {
 
   const projects = [
     {
-      id: 1,
+      id: 0,
       name: 'InTec System',
-      description: 'A comprehensive website redesign for an IT solutions provider, focusing on clarifying complex services and building corporate trust.',
+      description: 'A full redesign of intecsystem.com — modernising an existing IT solutions provider into a conversion-focused platform for enterprise decision-makers.',
       longDescription:
-        'The InTec System redesign transforms a standard corporate presence into a modern, conversion-focused platform. The goal was to simplify the user journey for complex IT services like virtualization and system integration. By utilizing a clean, card-based layout with generous whitespace and a confident blue color system, the design guides decision-makers clearly from problem to solution. Key trusted partners like VMware and Cisco are highlighted to build immediate credibility, while the responsive "Ideas Made Digital" section ensures the message resonates across all devices.',
-      image: intecThumb,
-      detailImages: [intec3, intec1, intec2],
-      category: 'Website Design'
+        'InTec System is a live redesign of the existing intecsystem.com website. The goal was to modernise a dated IT services presence into a credible, conversion-focused platform. The redesign clarifies the user journey for complex offerings — virtualization, system integration, and managed infrastructure — through a clean card-based layout, confident typography, and a trusted-partner showcase featuring Cisco, Oracle, AWS, and HP. The responsive result turns a technical offering into an approachable, authoritative digital presence.',
+      image: intecNewThumb,
+      detailImages: [intecNew1, intecNew2],
+      category: 'Website Redesign',
+      url: 'https://intecsystems.gridlinelabs.com',
+      thumbPadded: true,
+    },
+    {
+      id: -1,
+      name: 'Gridline Labs',
+      description: 'The studio website for Gridline Labs — a design-led digital agency focused on building purposeful digital products.',
+      longDescription:
+        'Gridline Labs is the agency behind the design work in this portfolio. The website needed to communicate a clear design-led identity while remaining functional as a business platform — showcasing services, work, and values without unnecessary noise. The design uses confident typography, restrained color, and deliberate whitespace to let the work speak. Every section is built to establish trust quickly and move visitors toward a conversation.',
+      image: gridlineThumb,
+      detailImages: [gridline1, gridline2, gridline3],
+      category: 'Website Design',
+      url: 'https://gridlinelabs.com',
+      thumbPadded: true,
     },
     {
       id: 2,
       name: 'Scribbly',
-      description: 'A playful sketching experience focused on minimal UI, expressive strokes, and quick ideation.',
+      description: 'An AI-powered note-taking app designed for quick capture — blending typed notes and freehand scribbles in one minimal space.',
       longDescription:
-        'Scribbly is a playful sketching concept built for speed and experimentation. The UI stays out of the way so the canvas always feels “ready,” with tools surfaced only when needed. I explored a minimal control system, strong empty-space composition, and expressive visual feedback for strokes and states. The concept is aimed at quick ideation: sketch, iterate, and export without the typical complexity that slows creative flow.',
+        'Scribbly is an AI-powered note and scribble-taking app built for the way people actually think — messy, fast, and non-linear. The interface keeps friction low so capturing an idea feels instant, whether it\'s typed text or a quick handwritten scrawl. AI assists in organizing and surfacing notes without getting in the way. The design prioritizes a calm, minimal aesthetic that lets the content breathe, making it easy to focus on thinking rather than managing a tool.',
       image: scribblyThumb,
       detailImages: [scribbly1, scribbly2, scribbly3],
       category: 'App Design'
@@ -74,7 +92,7 @@ const Projects = () => {
         'Laboratorium is a cultural education center in Macedonia that bridges the gap between formal and informal learning. The visual identity reflects this mission by combining raw, industrial textures with a retro-educational aesthetic. Using collage-style imagery, bold typography, and a distinct red-and-black color palette, the design captures the spirit of experimentation and hands-on creativity. It’s a space where ideas are tested, and arts and crafts meet practical skills.',
       image: labThumb,
       detailImages: [labNew1, lab2, lab3],
-      category: 'Visual Identity'
+      category: 'Website Design'
     },
     {
       id: 5,
@@ -84,7 +102,7 @@ const Projects = () => {
         'Hootlink is an exploration into emotional design for utility screens. The goal was to transform a standard login process into a moment of delight. The owl mascot serves as a friendly guide, reacting in real-time—peeking when you type your email and covering its eyes when you enter your password. This conceptual flow demonstrates how micro-interactions and character design can build brand affection even in the most functional parts of an application.',
       image: hootlinkThumb,
       detailImages: [hootlink1, hootlink2, hootlink3],
-      category: 'Interaction Design'
+      category: 'Login Screen'
     },
   ];
 
@@ -159,6 +177,34 @@ const Projects = () => {
   }, [isDragging]);
 
 
+  // Mouse wheel → horizontal scroll
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      const atStart = scrollLeft <= 0;
+      const atEnd = scrollLeft >= scrollWidth - clientWidth - 1;
+      if ((e.deltaY < 0 && atStart) || (e.deltaY > 0 && atEnd)) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY * 0.5;
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  const scrollByCard = (dir: 'left' | 'right') => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'right' ? 240 : -240, behavior: 'smooth' });
+  };
+
+  const canScrollLeft = scrollProgress > 0.02;
+  const canScrollRight = scrollProgress < 0.98;
+
   // Handle dragging the scrollbar
   useEffect(() => {
     if (!isDragging) return;
@@ -231,17 +277,47 @@ const Projects = () => {
         className="pt-12 pb-16 sm:py-[60px] scroll-mt-[40px]"
       >
         <motion.div
-          initial={{ opacity: 0, y: 60, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: false, amount: 0.25 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          <div className="mb-6 sm:mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">Work</h2>
-            <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
-              Explore my projects: a testament to the art of minimal design
-              meeting functionality.
-            </p>
+          <div className="mb-6 sm:mb-10 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-6">Work</h2>
+              <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
+                Explore my projects: a testament to the art of minimal design
+                meeting functionality.
+              </p>
+            </div>
+            {/* Desktop arrow nav */}
+            <div className="hidden lg:flex items-center gap-2 flex-shrink-0 pb-1">
+              <AnimatePresence>
+                {canScrollLeft && (
+                  <motion.button
+                    key="left"
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.85 }}
+                    transition={{ duration: 0.18 }}
+                    type="button"
+                    onClick={() => scrollByCard('left')}
+                    className="w-9 h-9 rounded-full chip-surface flex items-center justify-center hover:border-primary/40 hover:text-primary transition-colors duration-200"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+              <motion.button
+                type="button"
+                onClick={() => scrollByCard('right')}
+                animate={{ opacity: canScrollRight ? 1 : 0.3 }}
+                transition={{ duration: 0.18 }}
+                className="w-9 h-9 rounded-full chip-surface flex items-center justify-center hover:border-primary/40 hover:text-primary transition-colors duration-200"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </motion.button>
+            </div>
           </div>
 
           <div className="pt-2">
@@ -252,9 +328,10 @@ const Projects = () => {
               <div
                 ref={scrollerRef}
                 className="overflow-x-auto overflow-y-visible pt-3 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 snap-x snap-mandatory lg:snap-none no-scrollbar"
+                style={{ touchAction: 'pan-x' }}
               >
                 <motion.div
-                  className="flex flex-nowrap gap-4 sm:gap-5 lg:gap-6 pb-2 pr-4 sm:pr-6 lg:pr-32"
+                  className="flex flex-nowrap gap-4 sm:gap-5 lg:gap-6 pb-2"
                   viewport={{ once: true, margin: "-100px" }}
                 >
                   {projects.map((project, index) => {
@@ -266,10 +343,10 @@ const Projects = () => {
                         className="group text-left flex-shrink-0 w-[240px] sm:w-[280px] md:w-[300px] lg:w-[320px] snap-center snap-always"
                         data-project-card
                         onClick={() => setSelectedProjectId(project.id)}
-                        initial={{ opacity: 0.8, scale: 0.98 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4 }}
-                        viewport={{ once: false, amount: 0.6 }}
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.07, ease: 'easeOut' }}
+                        viewport={{ once: true, amount: 0.4 }}
                       >
                         <div className={`group rounded-2xl card-surface transition-all duration-300 overflow-hidden ${isActive ? 'border-primary ring-1 ring-primary' : 'card-surface-hover lg:hover:border-primary/50'}`}>
                           <div className="relative h-40 sm:h-44 md:h-48 flex items-center justify-center">
@@ -277,12 +354,12 @@ const Projects = () => {
 
                             {/* Project Image or Fallback Pattern */}
                             {(project as any).image ? (
-                              <div className="absolute inset-0 p-3 sm:p-4">
-                                <div className="w-full h-full relative rounded-lg overflow-hidden flex items-center justify-center">
+                              <div className={`absolute inset-0 ${(project as any).thumbPadded ? 'p-3 sm:p-4' : ''}`}>
+                                <div className={`w-full h-full relative overflow-hidden flex items-center justify-center ${(project as any).thumbPadded ? 'rounded-xl' : ''}`}>
                                   <img
                                     src={(project as any).image}
                                     alt={project.name}
-                                    className="w-[100%] h-[100%] object-contain transition-transform duration-500 group-hover:scale-125 hover:rotate-3"
+                                    className="w-[100%] h-[100%] object-contain transition-transform duration-500 ease-out group-hover:scale-110"
                                   />
                                 </div>
                               </div>
@@ -334,21 +411,22 @@ const Projects = () => {
                       </motion.button>
                     );
                   })}
+                  <div className="flex-shrink-0 w-4 sm:w-6 lg:w-8 -ml-4 sm:-ml-5 lg:-ml-6" />
                 </motion.div>
               </div>
 
               {/* Desktop Scrollbar (Bottom) */}
-              <div className="hidden lg:flex flex-col w-full mt-8 px-1 gap-2">
-                <span className="text-[10px] text-muted uppercase tracking-widest font-medium ml-1">Drag to Scroll <span className='italic'>or</span> Shift + Mouse Scroll</span>
+              <div className="hidden lg:flex flex-col w-full mt-6 px-1">
                 <div
                   ref={scrollbarRef}
-                  className="w-full h-3 bg-black/5 dark:bg-white/10 rounded-full cursor-pointer relative group overflow-hidden"
+                  className="w-full h-[3px] bg-black/8 dark:bg-white/10 rounded-full cursor-pointer relative group overflow-hidden"
                   onMouseDown={handleScrollBarMouseDown}
                 >
                   <motion.div
-                    className="absolute top-0 left-0 h-full bg-primary rounded-full"
-                    style={{ width: '25%', left: `${scrollProgress * 75}%` }}
-                    transition={{ duration: 0 }}
+                    className="absolute top-0 h-full bg-primary rounded-full"
+                    style={{ width: '25%' }}
+                    animate={{ left: `${scrollProgress * 75}%` }}
+                    transition={{ type: 'tween', duration: 0.15, ease: 'easeOut' }}
                   />
                 </div>
               </div>
@@ -411,13 +489,13 @@ const Projects = () => {
                     {[0, 1, 2].map((slot) => {
                       const hasImage = (selectedProject as any).detailImages && (selectedProject as any).detailImages[slot];
                       return (
-                        <div key={slot} className="flex-shrink-0 w-fit max-w-[85vw] snap-center rounded-2xl overflow-hidden shadow-sm border border-black/5 dark:border-white/5 bg-white dark:bg-[#0b0b0b] mx-auto">
+                        <div key={slot} className="flex-shrink-0 w-[85vw] lg:w-full snap-center rounded-2xl overflow-hidden shadow-sm border border-black/5 dark:border-white/5 bg-white dark:bg-[#0b0b0b] mx-auto">
                           {hasImage ? (
                             <div className="w-full relative flex items-center justify-center bg-gray-50/50 dark:bg-zinc-900/30 p-1">
                               <img
                                 src={(selectedProject as any).detailImages[slot]}
                                 alt={`${selectedProject.name} detail ${slot + 1}`}
-                                className="w-auto h-auto max-h-[50vh] sm:max-h-[500px] object-contain block mx-auto rounded-lg"
+                                className="w-full max-h-[50vh] sm:max-h-[500px] object-contain block mx-auto rounded-lg"
                               />
                             </div>
                           ) : (
@@ -449,10 +527,21 @@ const Projects = () => {
 
               {/* Mobile Read More Button (Fixed at bottom) */}
               <div className="lg:hidden w-full flex flex-col gap-3 px-4 pb-4 mt-auto z-[60] relative">
+                {(selectedProject as any).url && (
+                  <a
+                    href={(selectedProject as any).url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-primary text-white text-xs font-semibold uppercase tracking-widest"
+                  >
+                    Visit Site
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
-                  className="w-full bg-white dark:bg-[#1a1a1a] py-3 rounded-xl flex items-center justify-center gap-2 text-xs font-medium border border-black/5 dark:border-white/10 shadow-sm transition-colors active:scale-[0.98]"
+                  className="w-full bg-white dark:bg-[#1a1a1a] py-3 rounded-full flex items-center justify-center gap-2 text-xs font-medium border border-black/5 dark:border-white/10 shadow-sm transition-colors active:scale-[0.98]"
                 >
                   <span className="uppercase tracking-widest text-muted">{isDescriptionOpen ? 'Read less' : 'Read more'}</span>
                   <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-300 ${isDescriptionOpen ? 'rotate-180' : ''}`} />
@@ -465,7 +554,7 @@ const Projects = () => {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="overflow-hidden bg-white dark:bg-[#1a1a1a] rounded-xl border border-black/5 dark:border-white/10 shadow-sm"
+                      className="overflow-hidden bg-white dark:bg-[#1a1a1a] rounded-2xl border border-black/5 dark:border-white/10 shadow-sm"
                     >
                       <div className="p-4">
                         <p className="text-muted leading-relaxed text-sm">
@@ -485,7 +574,7 @@ const Projects = () => {
                   <div className="hidden lg:flex items-start justify-between mb-8">
                     <div>
                       <h2 className="text-3xl font-bold mb-2">{selectedProject.name}</h2>
-                      <p className="text-muted text-lg">App Design</p>
+                      <p className="text-muted text-lg">{selectedProject.category}</p>
                     </div>
                     <button
                       type="button"
@@ -502,6 +591,18 @@ const Projects = () => {
                       <p>{selectedProject.longDescription ?? selectedProject.description}</p>
                     </div>
                   </div>
+
+                  {(selectedProject as any).url && (
+                    <a
+                      href={(selectedProject as any).url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                    >
+                      Visit Site
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

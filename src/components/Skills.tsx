@@ -110,10 +110,10 @@ const Skills = () => {
       className="pt-2 pb-16 sm:pt-4 sm:pb-[60px] relative overflow-hidden scroll-mt-[40px]"
     >
       <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.9 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: false, amount: 0.6 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
         {/* Header Section - Matching Projects/Characteristics style */}
         <div className="mb-12 sm:mb-16">

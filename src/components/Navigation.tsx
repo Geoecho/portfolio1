@@ -87,9 +87,15 @@ const Navigation = () => {
 
     // Enforce theme color by replacing any existing tags
     // Enforce theme color by updating the existing tag
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) {
-      meta.setAttribute('content', theme === 'dark' ? '#050505' : '#ffffff');
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#050505' : '#ffffff');
+    }
+
+    // Update iOS status bar style
+    const metaAppleStatus = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (metaAppleStatus) {
+      metaAppleStatus.setAttribute('content', theme === 'dark' ? 'black-translucent' : 'default');
     }
 
     localStorage.setItem('theme', theme);
@@ -108,24 +114,20 @@ const Navigation = () => {
     if (element) {
       const rect = element.getBoundingClientRect();
       const scrollTop = window.pageYOffset || window.scrollY || 0;
-
-      // Explicit offsets for consistent spacing
-      const DESKTOP_OFFSET = 40;
-      const MOBILE_OFFSET = 40;
-
       const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
 
-      let targetY;
+      let targetY: number;
 
-      if (sectionId === 'contact' && !isDesktop) {
-        // Center alignment for Contact on Mobile
-        targetY = (rect.top + scrollTop) + (rect.height / 2) - (window.innerHeight / 2);
+      if (isDesktop) {
+        // Center the section vertically in the viewport
+        const sectionAbsTop = rect.top + scrollTop;
+        targetY = sectionAbsTop + rect.height / 2 - window.innerHeight / 2;
       } else {
-        const offset = isDesktop ? DESKTOP_OFFSET : MOBILE_OFFSET;
-        targetY = rect.top + scrollTop - offset;
+        // Consistent 80px from top on mobile
+        targetY = rect.top + scrollTop - 80;
       }
 
-      smoothScrollTo(Math.max(targetY, 0), 1000);
+      smoothScrollTo(Math.max(targetY, 0), 900);
     }
   };
 

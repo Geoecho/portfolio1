@@ -70,10 +70,10 @@ const Contact = () => {
       className="min-h-[100dvh] flex flex-col justify-center items-center text-center scroll-mt-[40px] pt-20 pb-36 lg:pb-48"
     >
       <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="w-full flex flex-col items-center"
       >
         <div className="w-full max-w-2xl px-4 sm:px-0">

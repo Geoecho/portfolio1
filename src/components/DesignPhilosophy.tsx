@@ -73,10 +73,10 @@ const DesignPhilosophy = () => {
       className="py-16 sm:py-[60px] scroll-mt-[40px]"
     >
       <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: false, amount: 0.25 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
         <div className="mb-12 sm:mb-16 text-left">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">Design Philosophy</h2>
