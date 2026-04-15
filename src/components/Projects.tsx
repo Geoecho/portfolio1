@@ -323,7 +323,7 @@ const Projects = () => {
           <div className="pt-2">
 
             {/* Mobile scroll dots */}
-            <div className="flex lg:hidden justify-center gap-1.5 mb-4">
+            <div className="flex lg:hidden justify-start gap-1.5 mb-4">
               {projects.map((_, index) => (
                 <motion.div
                   key={index}

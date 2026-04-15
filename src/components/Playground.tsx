@@ -121,18 +121,14 @@ const Aesthetics = () => {
                   <motion.div
                     key={item.id}
                     initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      duration: 0.4,
-                      delay: index * 0.1
-                    }}
-                    viewport={{ once: true }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
                     className="group relative flex-shrink-0 w-[280px] sm:w-[320px] sm:w-auto h-full snap-center snap-always"
                     data-scroll-item
                     data-index={index}
                   >
                     <div
-                      className={`relative h-full p-6 sm:p-8 rounded-2xl card-surface transition-all duration-300 cursor-default overflow-hidden ${isActive ? 'border-primary' : 'lg:group-hover:border-primary/25 lg:group-hover:shadow-lg'}`}
+                      className={`relative h-full p-5 rounded-2xl card-surface transition-all duration-300 cursor-default overflow-hidden ${isActive ? 'border-primary' : 'lg:group-hover:border-primary/25 lg:group-hover:shadow-lg'}`}
                     >
                       <div className="relative z-10">
                         <div

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Hero from './components/Hero';
 import Skills from './components/Skills';
 import Characteristics from './components/Characteristics';
@@ -13,7 +13,7 @@ import CustomCursor from './components/CustomCursor';
 
 function App() {
   useLenis();
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   // Force scroll to top on mount/refresh
   useEffect(() => {
@@ -23,12 +23,16 @@ function App() {
     }
   }, []);
 
-  // Track scroll progress for mobile indicator
+  // Track scroll progress — direct DOM write, no re-render
   useEffect(() => {
     const onScroll = () => {
-      const el = document.documentElement;
-      const progress = el.scrollTop / (el.scrollHeight - el.clientHeight);
-      setScrollProgress(Math.min(1, Math.max(0, progress)));
+      const doc = document.documentElement;
+      const scrollTop = window.pageYOffset || doc.scrollTop;
+      const scrollable = doc.scrollHeight - doc.clientHeight;
+      const progress = scrollable > 0 ? Math.min(1, Math.max(0, scrollTop / scrollable)) : 0;
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -40,8 +44,9 @@ function App() {
       {/* Mobile scroll progress bar */}
       <div className="fixed top-0 left-0 right-0 h-0.5 z-[200] lg:hidden pointer-events-none">
         <div
-          className="h-full bg-primary transition-none origin-left"
-          style={{ transform: `scaleX(${scrollProgress})`, transformOrigin: 'left' }}
+          ref={progressBarRef}
+          className="h-full bg-primary"
+          style={{ transform: 'scaleX(0)', transformOrigin: 'left' }}
         />
       </div>
       <Navigation />
