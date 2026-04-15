@@ -402,7 +402,7 @@ const Projects = () => {
                             </div>
                           </div>
 
-                          <div className="p-4">
+                          <div className="p-5">
                             <div className="flex flex-col gap-2 mb-1">
                               <div className="w-fit px-2 py-1 rounded-full bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/5 backdrop-blur-sm">
                                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted block">

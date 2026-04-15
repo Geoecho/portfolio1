@@ -110,7 +110,7 @@ const DesignPhilosophy = () => {
                   data-index={index}
                 >
                   <div
-                    className={`relative h-full p-6 sm:p-8 rounded-2xl card-surface transition-all duration-300 ${isActive ? 'border-primary' : 'lg:group-hover:border-primary/25 lg:group-hover:shadow-lg'}`}
+                    className={`relative h-full p-5 rounded-2xl card-surface transition-all duration-300 ${isActive ? 'border-primary' : 'lg:group-hover:border-primary/25 lg:group-hover:shadow-lg'}`}
                   >
                     <div
                       className={`w-10 h-10 mb-6 flex items-center justify-center rounded-lg card-surface transition-colors duration-300 transition-transform ${isActive ? 'rotate-6' : 'group-hover:rotate-6'}`}

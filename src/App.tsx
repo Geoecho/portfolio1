@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Hero from './components/Hero';
 import Skills from './components/Skills';
 import Characteristics from './components/Characteristics';
@@ -13,19 +13,37 @@ import CustomCursor from './components/CustomCursor';
 
 function App() {
   useLenis();
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Force scroll to top on mount/refresh
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Optional: if using browser history restoration, we might need to disable it
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
   }, []);
 
+  // Track scroll progress for mobile indicator
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement;
+      const progress = el.scrollTop / (el.scrollHeight - el.clientHeight);
+      setScrollProgress(Math.min(1, Math.max(0, progress)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <div className="min-h-screen text-theme-primary selection:bg-primary selection:text-white overflow-hidden">
       <CustomCursor />
+      {/* Mobile scroll progress bar */}
+      <div className="fixed top-0 left-0 right-0 h-0.5 z-[200] lg:hidden pointer-events-none">
+        <div
+          className="h-full bg-primary transition-none origin-left"
+          style={{ transform: `scaleX(${scrollProgress})`, transformOrigin: 'left' }}
+        />
+      </div>
       <Navigation />
       <div className="grid-background fixed inset-0 z-0 pointer-events-none" />
       <BackgroundIcons />

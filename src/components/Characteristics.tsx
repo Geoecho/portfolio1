@@ -99,7 +99,7 @@ const Characteristics = () => {
           <div className="relative">
 
             <div ref={scrollerRef} className="mt-6 sm:mt-8 flex gap-4 overflow-x-auto overflow-y-hidden pb-4 -mx-4 px-4 items-stretch snap-x snap-mandatory scroll-px-6 lg:grid lg:grid-cols-3 lg:gap-6 lg:mx-0 lg:px-0 lg:overflow-visible lg:pb-0 no-scrollbar">
-              <div data-scroll-item data-index="0" className={`rounded-2xl p-6 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 0 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
+              <div data-scroll-item data-index="0" className={`rounded-2xl p-5 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 0 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
                 <div className="text-xs font-semibold tracking-wide text-muted uppercase mb-4">How I work</div>
                 <div className="text-lg font-semibold text-theme-primary mb-2">Calm, structured execution</div>
                 <div className="text-sm text-muted leading-relaxed">
@@ -107,7 +107,7 @@ const Characteristics = () => {
                 </div>
               </div>
 
-              <div data-scroll-item data-index="1" className={`rounded-2xl p-6 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 1 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
+              <div data-scroll-item data-index="1" className={`rounded-2xl p-5 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 1 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
                 <div className="text-xs font-semibold tracking-wide text-muted uppercase mb-4">Core Values</div>
                 <div className="flex flex-wrap gap-2">
                   <span className="px-3 py-1.5 rounded-full chip-surface text-sm font-medium text-theme-primary">Clarity</span>
@@ -117,7 +117,7 @@ const Characteristics = () => {
                 </div>
               </div>
 
-              <div data-scroll-item data-index="2" className={`rounded-2xl p-6 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 2 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
+              <div data-scroll-item data-index="2" className={`rounded-2xl p-5 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 2 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
                 <div className="text-xs font-semibold tracking-wide text-muted uppercase mb-4">What you get</div>
                 <div className="text-lg font-semibold text-theme-primary mb-2">Reliable partner</div>
                 <div className="text-sm text-muted leading-relaxed">
