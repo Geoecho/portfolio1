@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
-import { Dribbble, Instagram, Linkedin } from 'lucide-react';
+import { Instagram, Linkedin } from 'lucide-react';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -69,7 +69,7 @@ const Hero = () => {
       </div>
 
       {/* Social Icons - Mobile Layout */}
-      <div className="absolute top-6 left-0 z-50 lg:hidden">
+      <div className="absolute top-6 right-0 z-50 lg:hidden">
         <SocialIcons className="flex gap-6 items-center" delay={0.25} />
       </div>
     </section>
@@ -86,18 +86,7 @@ const SocialIcons = ({ className, delay }: { className?: string, delay: number }
       transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], delay }}
       className={className}
     >
-      <motion.a
-        href="#"
-        className="text-muted hover:text-primary transition-colors duration-300"
-        aria-label="Dribbble"
-        animate={prefersReducedMotion ? undefined : { y: [0, -3, 0] }}
-        transition={prefersReducedMotion ? undefined : { duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-        whileHover={{ scale: 1.08, y: -1 }}
-        whileTap={{ scale: 0.92, y: 0 }}
-      >
-        <Dribbble size={28} strokeWidth={1.5} />
-      </motion.a>
-      <motion.a
+<motion.a
         href="https://instagram.com/hristijanbr"
         target="_blank"
         rel="noopener noreferrer"

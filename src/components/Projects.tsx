@@ -332,7 +332,6 @@ const Projects = () => {
               >
                 <motion.div
                   className="flex flex-nowrap gap-4 sm:gap-5 lg:gap-6 pb-2"
-                  viewport={{ once: true, margin: "-100px" }}
                 >
                   {projects.map((project, index) => {
                     const isActive = activeProjectIndex === index;
@@ -344,9 +343,8 @@ const Projects = () => {
                         data-project-card
                         onClick={() => setSelectedProjectId(project.id)}
                         initial={{ opacity: 0, y: 12 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.07, ease: 'easeOut' }}
-                        viewport={{ once: true, amount: 0.4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.3 + index * 0.07, ease: 'easeOut' }}
                       >
                         <div className={`group rounded-2xl card-surface transition-all duration-300 overflow-hidden ${isActive ? 'border-primary ring-1 ring-primary' : 'card-surface-hover lg:hover:border-primary/50'}`}>
                           <div className="relative h-40 sm:h-44 md:h-48 flex items-center justify-center">
