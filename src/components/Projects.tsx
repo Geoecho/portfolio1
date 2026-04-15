@@ -463,7 +463,7 @@ const Projects = () => {
             {/* Scrollable Content Wrapper */}
             <div
               ref={mobileScrollRef}
-              className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row"
+              className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row min-h-0"
             >
 
               {/* Left Panel: Scrollable Images */}
@@ -488,33 +488,16 @@ const Projects = () => {
                   <div className="flex flex-row lg:flex-col p-4 sm:p-6 lg:p-8 gap-2 lg:gap-6 items-start lg:items-center">
                     {[0, 1, 2].map((slot) => {
                       const hasImage = (selectedProject as any).detailImages && (selectedProject as any).detailImages[slot];
+                      if (!hasImage) return null;
                       return (
                         <div key={slot} className="flex-shrink-0 w-[85vw] lg:w-full snap-center rounded-2xl overflow-hidden shadow-sm border border-black/5 dark:border-white/5 bg-white dark:bg-[#0b0b0b] mx-auto">
-                          {hasImage ? (
-                            <div className="w-full relative flex items-center justify-center bg-gray-50/50 dark:bg-zinc-900/30 p-1">
-                              <img
-                                src={(selectedProject as any).detailImages[slot]}
-                                alt={`${selectedProject.name} detail ${slot + 1}`}
-                                className="w-full max-h-[50vh] sm:max-h-[500px] object-contain block mx-auto rounded-lg"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-full h-[300px] sm:h-[400px] relative">
-                              <div className="absolute inset-0 opacity-30">
-                                <svg className="w-full h-full" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                  <defs>
-                                    <pattern id={`project-detail-${slot}`} width="24" height="24" patternUnits="userSpaceOnUse">
-                                      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-theme-primary/40" />
-                                    </pattern>
-                                  </defs>
-                                  <rect width="100%" height="100%" fill={`url(#project-detail-${slot})`} />
-                                </svg>
-                              </div>
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-sm font-medium text-muted uppercase tracking-wider">Image Frame {slot + 1}</span>
-                              </div>
-                            </div>
-                          )}
+                          <div className="w-full relative flex items-center justify-center bg-gray-50/50 dark:bg-zinc-900/30 p-1">
+                            <img
+                              src={(selectedProject as any).detailImages[slot]}
+                              alt={`${selectedProject.name} detail ${slot + 1}`}
+                              className="w-full max-h-[50vh] sm:max-h-[500px] object-contain block mx-auto rounded-lg"
+                            />
+                          </div>
                         </div>
                       );
                     })}
@@ -523,47 +506,6 @@ const Projects = () => {
                   </div>
                 </div>
 
-              </div>
-
-              {/* Mobile Read More Button (Fixed at bottom) */}
-              <div className="lg:hidden w-full flex flex-col gap-3 px-4 pb-4 mt-auto z-[60] relative">
-                {(selectedProject as any).url && (
-                  <a
-                    href={(selectedProject as any).url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-primary text-white text-xs font-semibold uppercase tracking-widest"
-                  >
-                    Visit Site
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
-                  className="w-full bg-white dark:bg-[#1a1a1a] py-3 rounded-full flex items-center justify-center gap-2 text-xs font-medium border border-black/5 dark:border-white/10 shadow-sm transition-colors active:scale-[0.98]"
-                >
-                  <span className="uppercase tracking-widest text-muted">{isDescriptionOpen ? 'Read less' : 'Read more'}</span>
-                  <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-300 ${isDescriptionOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                <AnimatePresence>
-                  {isDescriptionOpen && (
-                    <motion.div
-                      initial={{ height: -5, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="overflow-hidden bg-white dark:bg-[#1a1a1a] rounded-2xl border border-black/5 dark:border-white/10 shadow-sm"
-                    >
-                      <div className="p-4">
-                        <p className="text-muted leading-relaxed text-sm">
-                          {selectedProject.longDescription ?? selectedProject.description}
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
 
               {/* Right Panel: Content (Scrollable with parent on mobile) - Hidden on mobile now as it is in dropdown */}
@@ -605,6 +547,47 @@ const Projects = () => {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Mobile Buttons (outside scroll — always visible at bottom) */}
+            <div className="lg:hidden w-full flex flex-col gap-3 px-4 pb-4 pt-3 border-t border-black/10 dark:border-white/10 bg-white dark:bg-[#0b0b0b] z-20">
+              {(selectedProject as any).url && (
+                <a
+                  href={(selectedProject as any).url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-primary text-white text-xs font-semibold uppercase tracking-widest"
+                >
+                  Visit Site
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
+                className="w-full bg-white dark:bg-[#1a1a1a] py-3 rounded-full flex items-center justify-center gap-2 text-xs font-medium border border-black/5 dark:border-white/10 shadow-sm transition-colors active:scale-[0.98]"
+              >
+                <span className="uppercase tracking-widest text-muted">{isDescriptionOpen ? 'Read less' : 'Read more'}</span>
+                <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-300 ${isDescriptionOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isDescriptionOpen && (
+                  <motion.div
+                    initial={{ height: -5, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden bg-white dark:bg-[#1a1a1a] rounded-2xl border border-black/5 dark:border-white/10 shadow-sm"
+                  >
+                    <div className="p-4">
+                      <p className="text-muted leading-relaxed text-sm">
+                        {selectedProject.longDescription ?? selectedProject.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div >
         </div >,
