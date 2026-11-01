@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, ArrowLeft, ArrowRight, X, Maximize2, Minimize2 } from './AnimatedIcons';
+import { ArrowUpRight, ArrowLeft, ArrowRight, X, Maximize2 } from './AnimatedIcons';
 import { projects } from '../data/projects';
 import { SectionIntro } from './SectionIntro';
 import { gsap, ScrollTrigger, useGSAP } from '../lib/scrollMotion';
@@ -15,6 +15,8 @@ const orderedProjects = [...projects].sort((a, b) => (a.id === 6 ? -2 : a.id ===
 function ProjectDialog({ project, onClose }: { project: Project; onClose: () => void }) {
   const [slide, setSlide] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const expandedRef = useRef(expanded);
+  expandedRef.current = expanded;
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useMotionPreference();
   const go = (direction: number) => setSlide(value => Math.max(0, Math.min(project.detailImages.length - 1, value + direction)));
@@ -27,7 +29,7 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
     root?.setAttribute('inert', '');
     ref.current?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') { if (expandedRef.current) setExpanded(false); else onClose(); }
       if (event.key === 'ArrowRight') { event.preventDefault(); setSlide(value => Math.min(value + 1, project.detailImages.length - 1)); }
       if (event.key === 'ArrowLeft') { event.preventDefault(); setSlide(value => Math.max(value - 1, 0)); }
       if (event.key !== 'Tab') return;
@@ -46,13 +48,13 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
   }, [onClose, project]);
 
   return <motion.div data-lenis-prevent className="project-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .45 }} onClick={onClose}>
-    <motion.div ref={ref} role="dialog" aria-modal="true" aria-labelledby="project-title" tabIndex={-1} className={`project-dialog ${expanded ? 'gallery-expanded' : ''}`} initial={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} transition={reduced ? { duration: 0 } : { duration: .55, ease: [.22, 1, .36, 1] }} onClick={event => event.stopPropagation()}>
+    <motion.div layout={!reduced} ref={ref} role="dialog" aria-modal="true" aria-labelledby="project-title" tabIndex={-1} className={`project-dialog ${expanded ? 'gallery-expanded' : ''}`} initial={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} transition={reduced ? { duration: 0 } : { duration: .55, ease: [.22, 1, .36, 1], layout: { duration: .55, ease: [.22, 1, .36, 1] } }} onClick={event => event.stopPropagation()}>
       <div className="dialog-top"><button className="dialog-close" onClick={onClose} aria-label="Close project">Close <X size={20} /></button></div>
-      <div className="dialog-body"><div className="dialog-gallery"><div className="gallery-stage">
+      <motion.div layout={!reduced} transition={{ layout: { duration: reduced ? 0 : .55, ease: [.22, 1, .36, 1] } }} className="dialog-body"><motion.div layout={!reduced} transition={{ layout: { duration: reduced ? 0 : .55, ease: [.22, 1, .36, 1] } }} className="dialog-gallery"><motion.div layout={!reduced} transition={{ layout: { duration: reduced ? 0 : .55, ease: [.22, 1, .36, 1] } }} className="gallery-stage">
         <AnimatePresence mode="wait" initial={false}><motion.img key={slide} src={project.detailImages[slide]} alt={`${project.name} design, image ${slide + 1}`} initial={{ opacity: 0, x: reduced ? 0 : 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: reduced ? 0 : -24 }} transition={{ duration: reduced ? 0 : .25 }} drag={reduced ? false : 'x'} dragConstraints={{ left: 0, right: 0 }} dragElastic={.15} onDragEnd={(_, info) => { if (info.offset.x < -50) go(1); if (info.offset.x > 50) go(-1); }} /></AnimatePresence>
-        <button className="gallery-expand icon-button" onClick={() => setExpanded(!expanded)} aria-label={expanded ? 'Reduce image' : 'Expand image'} aria-pressed={expanded}>{expanded ? <Minimize2 size={19} /> : <Maximize2 size={19} />}</button>
-      </div><div className="gallery-controls"><button className="icon-button" disabled={slide === 0} onClick={() => go(-1)} aria-label="Previous image"><ArrowLeft size={20} /></button><div className="gallery-thumbnails" role="group" aria-label="Project images">{project.detailImages.map((src, i) => <button key={src} onClick={() => setSlide(i)} aria-label={`Show image ${i + 1}`} aria-pressed={slide === i} className={slide === i ? 'selected' : ''}><img src={src} alt="" /></button>)}</div><button className="icon-button" disabled={slide === project.detailImages.length - 1} onClick={() => go(1)} aria-label="Next image"><ArrowRight size={20} /></button></div><span className="sr-only" role="status">Image {slide + 1} of {project.detailImages.length}</span></div>
-      <div className="dialog-copy"><h2 id="project-title">{project.name}</h2><p className="project-category">{project.category}</p><p className="dialog-description">{project.longDescription}</p>{project.url && <a className="hero-cta" href={project.url} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={18} /></a>}</div></div>
+        <button className={`gallery-expand icon-button ${expanded ? 'is-expanded' : ''}`} onClick={() => setExpanded(!expanded)} aria-label={expanded ? 'Reduce image' : 'Expand image'} aria-pressed={expanded}>{expanded ? <><ArrowLeft size={19} /><span>Back</span></> : <Maximize2 size={19} />}</button>
+      </motion.div><div className="gallery-controls"><button className="icon-button" disabled={slide === 0} onClick={() => go(-1)} aria-label="Previous image"><ArrowLeft size={20} /></button><div className="gallery-thumbnails" role="group" aria-label="Project images">{project.detailImages.map((src, i) => <button key={src} onClick={() => setSlide(i)} aria-label={`Show image ${i + 1}`} aria-pressed={slide === i} className={slide === i ? 'selected' : ''}><img src={src} alt="" /></button>)}</div><button className="icon-button" disabled={slide === project.detailImages.length - 1} onClick={() => go(1)} aria-label="Next image"><ArrowRight size={20} /></button></div><span className="sr-only" role="status">Image {slide + 1} of {project.detailImages.length}</span></motion.div>
+      <motion.div className="dialog-copy" animate={{ opacity: expanded ? 0 : 1 }} transition={{ duration: reduced ? 0 : .25, delay: expanded ? 0 : .15 }} aria-hidden={expanded} {...(expanded ? { inert: '' } : {})}><h2 id="project-title">{project.name}</h2><p className="project-category">{project.category}</p><p className="dialog-description">{project.longDescription}</p>{project.url && <a className="hero-cta" href={project.url} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={18} /></a>}</motion.div></motion.div>
     </motion.div>
   </motion.div>;
 }

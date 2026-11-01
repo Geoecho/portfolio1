@@ -1,4 +1,4 @@
-export type SpotifyPlayback = { data: { isPaused: boolean; isBuffering: boolean } };
+export type SpotifyPlayback = { data: { isPaused: boolean; isBuffering: boolean; duration?: number; position?: number } };
 export type SpotifyController = {
   play: () => void;
   pause: () => void;

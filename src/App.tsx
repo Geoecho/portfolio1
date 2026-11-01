@@ -38,6 +38,8 @@ function App() {
     <MotionConfig reducedMotion="user">
     <div className="min-h-screen text-theme-primary selection:bg-primary selection:text-white portfolio-root">
       <KineticGrid />
+      <div className="viewport-edge viewport-edge-top" aria-hidden="true" />
+      <div className="viewport-edge viewport-edge-bottom" aria-hidden="true" />
       <a href="#projects" className="skip-link">Skip to work</a>
       <div className="fixed top-0 left-0 right-0 h-0.5 z-[200] pointer-events-none">
         <div

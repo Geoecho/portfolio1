@@ -11,6 +11,7 @@ export default function MusicPlayer() {
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
   const [minimized, setMinimized] = useState(false);
+  const [preview, setPreview] = useState(false);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<SpotifyController | null>(null);
@@ -66,7 +67,10 @@ export default function MusicPlayer() {
           embed.play();
         });
         embed.addListener('playback_update', event => {
-          if (!cancelled) setPlaying(!event.data.isPaused);
+          if (!cancelled) {
+            setPlaying(!event.data.isPaused);
+            if (event.data.duration) setPreview(event.data.duration <= 31000);
+          }
         });
       });
     }).catch(fail);
@@ -93,11 +97,13 @@ export default function MusicPlayer() {
       {loading ? <Loader2 size={19} className="loading-spinner" /> : playing ? <Pause size={19} /> : <Play size={19} />}
     </button>
     {requested && <button type="button" className="dock-icon music-minimize" onClick={() => setMinimized(value => !value)} aria-label={minimized ? 'Expand Spotify player' : 'Minimize Spotify player'} aria-expanded={!minimized} aria-controls="spotify-player"><span className="music-track-label">Maggot Brain · Spotify</span>{minimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}</button>}
+    {requested && <a className="dock-icon music-open" href={track} target="_blank" rel="noopener noreferrer" aria-label="Open Maggot Brain in Spotify" title="Open the full track in Spotify"><ArrowUpRight size={18} /></a>}
     </div>
     <span className="sr-only" role="status">{error || (loading ? 'Loading Maggot Brain from Spotify.' : playing ? 'Maggot Brain is playing.' : '')}</span>
     {error && <a className="music-error" href={track} target="_blank" rel="noopener noreferrer">Open in Spotify <ArrowUpRight size={15} /></a>}
     {slot && requested && createPortal(<section id="spotify-player" className={`top-bar-music ${minimized ? 'is-minimized' : ''}`} aria-label="Spotify music player" aria-hidden={minimized} {...(minimized ? { inert: '' } : {})}>
       <div ref={host} className="music-embed-host" />
+      {preview && <p className="music-preview-notice">Spotify preview · <a href={track} target="_blank" rel="noopener noreferrer">Open full track <ArrowUpRight size={13} /></a></p>}
     </section>, slot)}
   </>;
 }
