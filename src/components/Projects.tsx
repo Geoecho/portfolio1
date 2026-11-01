@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, ArrowLeft, ArrowRight, X, Maximize2 } from './AnimatedIcons';
@@ -18,8 +18,18 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
   const expandedRef = useRef(expanded);
   expandedRef.current = expanded;
   const ref = useRef<HTMLDivElement>(null);
+  const expandButton = useRef<HTMLButtonElement>(null);
+  const backButton = useRef<HTMLButtonElement>(null);
+  const hasExpanded = useRef(false);
   const reduced = useMotionPreference();
   const go = (direction: number) => setSlide(value => Math.max(0, Math.min(project.detailImages.length - 1, value + direction)));
+  useLayoutEffect(() => {
+    if (!hasExpanded.current && !expanded) return;
+    hasExpanded.current = true;
+    ref.current?.scrollTo({ top: 0, behavior: 'instant' });
+    const frame = requestAnimationFrame(() => (expanded ? backButton : expandButton).current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [expanded]);
   useEffect(() => {
     const oldFocus = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
@@ -47,12 +57,12 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
     };
   }, [onClose, project]);
 
-  return <motion.div data-lenis-prevent className="project-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .45 }} onClick={onClose}>
+  return <motion.div data-lenis-prevent className={`project-overlay${expanded ? ' is-image-expanded' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .45 }} onClick={onClose}>
     <motion.div layout={!reduced} ref={ref} role="dialog" aria-modal="true" aria-labelledby="project-title" tabIndex={-1} className={`project-dialog ${expanded ? 'gallery-expanded' : ''}`} initial={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} transition={reduced ? { duration: 0 } : { duration: .55, ease: [.22, 1, .36, 1], layout: { duration: .55, ease: [.22, 1, .36, 1] } }} onClick={event => event.stopPropagation()}>
-      <div className="dialog-top"><button className="dialog-close" onClick={onClose} aria-label="Close project">Close <X size={20} /></button></div>
+      <div className="dialog-top">{expanded && <button ref={backButton} type="button" className="dialog-back" onClick={() => setExpanded(false)} aria-label="Back to project"><ArrowLeft size={20} /><span>Back</span></button>}<button className="dialog-close" onClick={onClose} aria-label="Close project">Close <X size={20} /></button></div>
       <motion.div layout={!reduced} transition={{ layout: { duration: reduced ? 0 : .55, ease: [.22, 1, .36, 1] } }} className="dialog-body"><motion.div layout={!reduced} transition={{ layout: { duration: reduced ? 0 : .55, ease: [.22, 1, .36, 1] } }} className="dialog-gallery"><motion.div layout={!reduced} transition={{ layout: { duration: reduced ? 0 : .55, ease: [.22, 1, .36, 1] } }} className="gallery-stage">
         <AnimatePresence mode="wait" initial={false}><motion.img key={slide} src={project.detailImages[slide]} alt={`${project.name} design, image ${slide + 1}`} initial={{ opacity: 0, x: reduced ? 0 : 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: reduced ? 0 : -24 }} transition={{ duration: reduced ? 0 : .25 }} drag={reduced ? false : 'x'} dragConstraints={{ left: 0, right: 0 }} dragElastic={.15} onDragEnd={(_, info) => { if (info.offset.x < -50) go(1); if (info.offset.x > 50) go(-1); }} /></AnimatePresence>
-        <button className={`gallery-expand icon-button ${expanded ? 'is-expanded' : ''}`} onClick={() => setExpanded(!expanded)} aria-label={expanded ? 'Reduce image' : 'Expand image'} aria-pressed={expanded}>{expanded ? <><ArrowLeft size={19} /><span>Back</span></> : <Maximize2 size={19} />}</button>
+        {!expanded && <button ref={expandButton} type="button" className="gallery-expand icon-button" onClick={() => setExpanded(true)} aria-label="Expand image" aria-pressed={false}><Maximize2 size={19} /></button>}
       </motion.div><div className="gallery-controls"><button className="icon-button" disabled={slide === 0} onClick={() => go(-1)} aria-label="Previous image"><ArrowLeft size={20} /></button><div className="gallery-thumbnails" role="group" aria-label="Project images">{project.detailImages.map((src, i) => <button key={src} onClick={() => setSlide(i)} aria-label={`Show image ${i + 1}`} aria-pressed={slide === i} className={slide === i ? 'selected' : ''}><img src={src} alt="" /></button>)}</div><button className="icon-button" disabled={slide === project.detailImages.length - 1} onClick={() => go(1)} aria-label="Next image"><ArrowRight size={20} /></button></div><span className="sr-only" role="status">Image {slide + 1} of {project.detailImages.length}</span></motion.div>
       <motion.div className="dialog-copy" animate={{ opacity: expanded ? 0 : 1 }} transition={{ duration: reduced ? 0 : .25, delay: expanded ? 0 : .15 }} aria-hidden={expanded} {...(expanded ? { inert: '' } : {})}><h2 id="project-title">{project.name}</h2><p className="project-category">{project.category}</p><p className="dialog-description">{project.longDescription}</p>{project.url && <a className="hero-cta" href={project.url} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={18} /></a>}</motion.div></motion.div>
     </motion.div>

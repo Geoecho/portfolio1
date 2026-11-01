@@ -7,6 +7,7 @@ import { ArrowUpRight } from './AnimatedIcons';
 
 const featured = [6, -1, 2].map(id => projects.find(project => project.id === id)!);
 const position = (slot: number) => ({
+  x: 0,
   xPercent: slot * 3.5,
   y: slot * 18,
   scale: 1 - slot * .045,
@@ -25,6 +26,9 @@ export default function HeroProjectStack({ onOpenProject }: { onOpenProject: (id
   const [switching, setSwitching] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const gesture = useRef<{ id: number; x: number; y: number; dx: number; horizontal: boolean } | null>(null);
+  const ignoreClickUntil = useRef(0);
   const [pageVisible, setPageVisible] = useState(true);
   const inView = useInView(root, { amount: .6 });
   const reduced = useMotionPreference();
@@ -39,6 +43,7 @@ export default function HeroProjectStack({ onOpenProject }: { onOpenProject: (id
 
   const goTo = contextSafe((next: number) => {
     if (busy.current || next === activeRef.current) return;
+    const restoreKeyboardFocus = focused && root.current?.contains(document.activeElement);
     busy.current = true;
     setSwitching(true);
     const previous = activeRef.current;
@@ -47,6 +52,7 @@ export default function HeroProjectStack({ onOpenProject }: { onOpenProject: (id
       setActive(next);
       busy.current = false;
       setSwitching(false);
+      if (restoreKeyboardFocus) requestAnimationFrame(() => cards.current[next]?.focus({ preventScroll: true }));
     };
     if (reduced) {
       cards.current.forEach((card, index) => gsap.set(card, position((index - next + featured.length) % featured.length)));
@@ -56,14 +62,14 @@ export default function HeroProjectStack({ onOpenProject }: { onOpenProject: (id
     const direction = (next - previous + featured.length) % featured.length === 1 ? -1 : 1;
     const timeline = gsap.timeline({ onComplete: finish });
     // Lift the outgoing card clear of the stack before it settles behind.
-    timeline.to(cards.current[previous], { xPercent: direction * 22, y: -18, rotation: direction * 6, scale: 1.015, duration: .36, ease: 'power2.inOut' }, 0)
-      .set(cards.current[previous], { zIndex: 1 }, .36)
-      .to(cards.current[previous], { ...position((previous - next + featured.length) % featured.length), duration: .66, ease: 'power3.out' }, .36);
+    timeline.to(cards.current[previous], { x: 0, xPercent: direction * 22, y: -18, rotation: direction * 6, scale: 1.015, duration: .22, ease: 'power2.inOut' }, 0)
+      .set(cards.current[previous], { zIndex: 1 }, .22)
+      .to(cards.current[previous], { ...position((previous - next + featured.length) % featured.length), duration: .42, ease: 'power3.out' }, .22);
     cards.current.forEach((card, index) => {
       if (index === previous) return;
       const target = position((index - next + featured.length) % featured.length);
-      timeline.set(card, { zIndex: target.zIndex }, .32)
-        .to(card, { ...target, duration: .7, ease: 'power3.inOut' }, .22);
+      timeline.set(card, { zIndex: target.zIndex }, .2)
+        .to(card, { ...target, duration: .46, ease: 'power3.inOut' }, .14);
     });
   });
   advance.current = goTo;
@@ -76,13 +82,27 @@ export default function HeroProjectStack({ onOpenProject }: { onOpenProject: (id
   }, []);
 
   useEffect(() => {
-    if (reduced || hovered || focused || !inView || !pageVisible || switching) return;
-    const timer = window.setTimeout(() => advance.current((activeRef.current + 1) % featured.length), 5000);
+    if (reduced || hovered || focused || dragging || !inView || !pageVisible || switching) return;
+    const timer = window.setTimeout(() => advance.current((activeRef.current + 1) % featured.length), 2800);
     return () => window.clearTimeout(timer);
-  }, [active, reduced, hovered, focused, inView, pageVisible, switching]);
+  }, [active, reduced, hovered, focused, dragging, inView, pageVisible, switching]);
 
-  return <div ref={root} className="hero-stack-container" role="group" aria-label="Featured projects" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
-    <div className="hero-stack-scene" aria-live="off">{featured.map((project, index) => <button type="button" key={project.id} className="hero-stack-card" data-project-id={project.id} data-front={index === active} tabIndex={index === active ? 0 : -1} aria-hidden={index !== active} disabled={index !== active || switching} onClick={() => onOpenProject(project.id)} aria-label={`View ${project.name} project`}>
+  return <div ref={root} className="hero-stack-container" role="group" aria-label="Featured projects" onPointerEnter={event => { if (event.pointerType === 'mouse') setHovered(true); }} onPointerLeave={event => { if (event.pointerType === 'mouse') setHovered(false); }} onFocusCapture={event => { if (event.target.matches(':focus-visible')) setFocused(true); }} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }} onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); advance.current((activeRef.current + (event.key === 'ArrowRight' ? 1 : featured.length - 1)) % featured.length); } }}>
+    <div className="hero-stack-scene" aria-live="off" onPointerDown={event => { if (busy.current || event.button !== 0) return; gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY, dx: 0, horizontal: false }; setDragging(true); }} onPointerMove={event => {
+      const start = gesture.current; if (!start || start.id !== event.pointerId) return;
+      start.dx = event.clientX - start.x;
+      if (!start.horizontal && Math.abs(start.dx) > 10 && Math.abs(start.dx) > Math.abs(event.clientY - start.y) * 1.3) { start.horizontal = true; event.currentTarget.setPointerCapture(event.pointerId); }
+      if (start.horizontal && !reduced) gsap.set(cards.current[activeRef.current], { x: start.dx * .3, rotation: start.dx * .012 });
+    }} onPointerUp={event => {
+      const start = gesture.current; if (!start || start.id !== event.pointerId) return;
+      gesture.current = null; setDragging(false);
+      if (start.horizontal) {
+        ignoreClickUntil.current = performance.now() + 500;
+        if (Math.abs(start.dx) > 40) advance.current((activeRef.current + (start.dx < 0 ? 1 : featured.length - 1)) % featured.length);
+        else gsap.to(cards.current[activeRef.current], { x: 0, rotation: 0, duration: reduced ? 0 : .2 });
+      }
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    }} onPointerLeave={() => { if (gesture.current && !gesture.current.horizontal) { gesture.current = null; setDragging(false); } }} onPointerCancel={() => { gesture.current = null; setDragging(false); gsap.set(cards.current[activeRef.current], { x: 0, rotation: 0 }); }}>{featured.map((project, index) => <button type="button" key={project.id} className="hero-stack-card" data-project-id={project.id} data-front={index === active} tabIndex={index === active ? 0 : -1} aria-hidden={index !== active} disabled={index !== active || switching} onClick={() => { if (performance.now() >= ignoreClickUntil.current) onOpenProject(project.id); }} aria-label={`View ${project.name} project`}>
       <div className="hero-stack-art"><img src={project.image} alt={`${project.name} design preview`} /></div>
       <div className="hero-stack-caption"><div><h2>{project.name}</h2><p>{project.category}</p></div><ArrowUpRight size={21} /></div>
     </button>)}</div>
