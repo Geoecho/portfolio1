@@ -32,6 +32,7 @@ import { PauseIcon } from './icons/pause';
 import { PlayIcon } from './icons/play';
 import { AudioLinesIcon } from './icons/audio-lines';
 import { GamepadIcon } from './icons/gamepad';
+import { BombIcon } from './icons/bomb';
 
 type Handle = { startAnimation: () => void; stopAnimation: () => void };
 type SourceIcon = ComponentType<HTMLAttributes<HTMLSpanElement> & { size?: number } & RefAttributes<Handle>>;
@@ -104,3 +105,4 @@ export const Pause = animated(PauseIcon, 'pause');
 export const Play = animated(PlayIcon, 'play');
 export const Music = animated(AudioLinesIcon, 'audio-lines');
 export const Gamepad = animated(GamepadIcon, 'gamepad');
+export const Bomb = animated(BombIcon, 'bomb');

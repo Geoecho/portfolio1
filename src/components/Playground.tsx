@@ -11,7 +11,7 @@ const studies = [
   { title: 'Typography', icon: Type, label: 'Find a comfortable rhythm.' },
   { title: 'Contrast', icon: Palette, label: 'Keep the message readable.' },
   { title: 'Feedback', icon: MousePointer2, label: 'An action deserves a response.' },
-  { title: 'Type Rush', icon: Gamepad, label: 'Less noise. More play.' },
+  { title: 'Type Rush', icon: Gamepad, label: 'Catch words. Dodge bombs.' },
 ];
 const palette = [{ name: 'White', color: '#ffffff', text: '#000000' }, { name: 'Red', color: '#d60000', text: '#ffffff' }, { name: 'Black', color: '#000000', text: '#ffffff' }];
 
