@@ -84,16 +84,21 @@ export default function FeaturedProject() {
       };
     };
     media.add('(min-width: 1024px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)', () => setup(false));
-    media.add('(max-width: 1023px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)', () => setup(true));
+    media.add('(max-width: 1023px) and (min-height: 740px) and (prefers-reduced-motion: no-preference)', () => setup(true));
+    media.add('(max-width: 1023px) and (max-height: 739px) and (prefers-reduced-motion: no-preference)', () => {
+      gsap.utils.toArray<HTMLElement>('.story-step-copy', section.current!).forEach(copy => {
+        gsap.from(copy, { autoAlpha: 0, filter: 'blur(6px)', duration: .7, ease: 'power2.out', scrollTrigger: { trigger: copy, start: 'top 90%', once: true } });
+      });
+    });
     return () => media.revert();
   }, { scope: section });
 
   return <section ref={section} id="featured-work" className="editorial-section featured-story" aria-labelledby="featured-title">
     <div className="story-heading"><h2 id="featured-title">Gridline Labs</h2><a className="text-link" href="https://gridlinelabs.com" target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={18} /></a></div>
     <div className="story-layout"><div className="story-stage">
-      <div className="story-chapters">{chapters.map(chapter => <article className="story-step" key={chapter.label}>
+      <div className="story-chapters">{chapters.map((chapter, index) => <article className="story-step" key={chapter.label}>
         <div className="story-step-copy"><h4>{chapter.title}</h4><p>{chapter.text}</p></div>
-        <figure className="story-mobile-image"><img src={chapter.image} alt={chapter.alt} loading="lazy" /></figure>
+        <figure className="story-mobile-image"><picture><source media="(max-width: 767px)" srcSet={mobileScreens[index]} /><img src={chapter.image} alt={chapter.alt} loading="lazy" /></picture></figure>
       </article>)}</div>
       <div className="story-visual" aria-hidden="true">
         <div className="story-window-bar"><span>gridlinelabs.com</span><ArrowUpRight size={16} /></div>

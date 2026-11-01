@@ -11,6 +11,7 @@ import Navigation from './components/Navigation';
 import FeaturedProject from './components/FeaturedProject';
 import { useLenis } from './hooks/useLenis';
 import TopBar from './components/TopBar';
+import BackToTop from './components/BackToTop';
 
 function App() {
   const scrollToTop = useLenis();
@@ -45,7 +46,8 @@ function App() {
         />
       </div>
       <Navigation onHome={scrollToTop} />
-      <TopBar onBackToTop={scrollToTop} />
+      <TopBar />
+      <BackToTop onActivate={scrollToTop} />
 
 
       <main className="portfolio-panel relative z-10 max-w-7xl mx-auto px-5 sm:px-10 lg:px-16">

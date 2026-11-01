@@ -1,10 +1,9 @@
 import { useLayoutEffect, useRef } from 'react';
 import SocialLinks from './SocialLinks';
 import MusicPlayer from './MusicPlayer';
-import BackToTop from './BackToTop';
 import { ScrollTrigger } from '../lib/scrollMotion';
 
-export default function TopBar({ onBackToTop }: { onBackToTop: () => void }) {
+export default function TopBar() {
   const bar = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
     let frame = 0;
@@ -27,7 +26,7 @@ export default function TopBar({ onBackToTop }: { onBackToTop: () => void }) {
   return <header ref={bar} className="top-bar" aria-label="Music and social links">
     <div className="top-bar-content">
       <div id="music-embed-slot" />
-      <div className="top-bar-actions"><MusicPlayer /><BackToTop onActivate={onBackToTop} /><SocialLinks /></div>
+      <div className="top-bar-actions"><MusicPlayer /><SocialLinks /></div>
     </div>
   </header>;
 }

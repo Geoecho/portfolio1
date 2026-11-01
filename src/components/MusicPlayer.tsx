@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUpRight, Loader2, Pause, Play } from './AnimatedIcons';
+import { ArrowUpRight, Loader2, Pause, Play, Minimize2, Maximize2 } from './AnimatedIcons';
 import { loadSpotifyEmbed, type SpotifyController } from '../lib/spotifyEmbed';
 
 const track = 'https://open.spotify.com/track/2t5GyUfFoZg3E8ak3i7dVP';
@@ -10,6 +10,7 @@ export default function MusicPlayer() {
   const [loading, setLoading] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
+  const [minimized, setMinimized] = useState(false);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<SpotifyController | null>(null);
@@ -87,12 +88,15 @@ export default function MusicPlayer() {
 
   const label = loading ? 'Loading Spotify player' : playing ? 'Pause Maggot Brain' : 'Play Maggot Brain on Spotify';
   return <>
+    <div className="music-controls">
     <button type="button" className={`dock-icon music-trigger ${playing ? 'is-playing' : ''}`} onClick={toggle} aria-label={label} title={label} aria-pressed={playing} aria-busy={loading} disabled={loading}>
       {loading ? <Loader2 size={19} className="loading-spinner" /> : playing ? <Pause size={19} /> : <Play size={19} />}
     </button>
+    {requested && <button type="button" className="dock-icon music-minimize" onClick={() => setMinimized(value => !value)} aria-label={minimized ? 'Expand Spotify player' : 'Minimize Spotify player'} aria-expanded={!minimized} aria-controls="spotify-player"><span className="music-track-label">Maggot Brain · Spotify</span>{minimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}</button>}
+    </div>
     <span className="sr-only" role="status">{error || (loading ? 'Loading Maggot Brain from Spotify.' : playing ? 'Maggot Brain is playing.' : '')}</span>
     {error && <a className="music-error" href={track} target="_blank" rel="noopener noreferrer">Open in Spotify <ArrowUpRight size={15} /></a>}
-    {slot && requested && createPortal(<section className="top-bar-music" aria-label="Spotify music player">
+    {slot && requested && createPortal(<section id="spotify-player" className={`top-bar-music ${minimized ? 'is-minimized' : ''}`} aria-label="Spotify music player" aria-hidden={minimized} {...(minimized ? { inert: '' } : {})}>
       <div ref={host} className="music-embed-host" />
     </section>, slot)}
   </>;

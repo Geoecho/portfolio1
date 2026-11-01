@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, ArrowLeft, ArrowRight, X, Maximize2, Minimize2 } from './AnimatedIcons';
 import { projects } from '../data/projects';
-import { reveal, SectionIntro } from './SectionIntro';
-import { ScrollTrigger } from '../lib/scrollMotion';
+import { SectionIntro } from './SectionIntro';
+import { gsap, ScrollTrigger, useGSAP } from '../lib/scrollMotion';
 import { useMotionPreference } from '../hooks/useMotionPreference';
 import ProjectPreview from './ProjectPreview';
 
@@ -45,8 +45,8 @@ function ProjectDialog({ project, onClose }: { project: Project; onClose: () => 
     };
   }, [onClose, project]);
 
-  return <motion.div data-lenis-prevent className="project-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-    <motion.div ref={ref} role="dialog" aria-modal="true" aria-labelledby="project-title" tabIndex={-1} className={`project-dialog ${expanded ? 'gallery-expanded' : ''}`} initial={reduced ? { opacity: 0 } : { y: 48, scale: .96, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={reduced ? { opacity: 0 } : { y: 24, scale: .98, opacity: 0 }} transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 220, damping: 28 }} onClick={event => event.stopPropagation()}>
+  return <motion.div data-lenis-prevent className="project-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .45 }} onClick={onClose}>
+    <motion.div ref={ref} role="dialog" aria-modal="true" aria-labelledby="project-title" tabIndex={-1} className={`project-dialog ${expanded ? 'gallery-expanded' : ''}`} initial={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={reduced ? { opacity: 0 } : { y: '100vh', opacity: 0 }} transition={reduced ? { duration: 0 } : { duration: .55, ease: [.22, 1, .36, 1] }} onClick={event => event.stopPropagation()}>
       <div className="dialog-top"><button className="dialog-close" onClick={onClose} aria-label="Close project">Close <X size={20} /></button></div>
       <div className="dialog-body"><div className="dialog-gallery"><div className="gallery-stage">
         <AnimatePresence mode="wait" initial={false}><motion.img key={slide} src={project.detailImages[slide]} alt={`${project.name} design, image ${slide + 1}`} initial={{ opacity: 0, x: reduced ? 0 : 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: reduced ? 0 : -24 }} transition={{ duration: reduced ? 0 : .25 }} drag={reduced ? false : 'x'} dragConstraints={{ left: 0, right: 0 }} dragElastic={.15} onDragEnd={(_, info) => { if (info.offset.x < -50) go(1); if (info.offset.x > 50) go(-1); }} /></AnimatePresence>
@@ -63,13 +63,26 @@ export default function Projects({ selectedId, onSelect }: { selectedId: number 
   const reduced = useMotionPreference();
   const visible = orderedProjects.filter(project => filter === 'All work' || (filter === 'Websites' && project.category.includes('Website')) || (filter === 'Apps' && project.category === 'App Design') || (filter === 'Interactions' && project.category === 'Login Screen'));
   const closeRef = useRef(() => onSelect(null));
-  return <section id="projects" className="editorial-section">
+  const section = useRef<HTMLElement>(null);
+  useGSAP(context => {
+    if (reduced) return;
+    const ids = new Set(visible.map(project => String(project.id)));
+    const cards = gsap.utils.toArray<HTMLElement>('.work-card-reveal', section.current!).filter(card => ids.has(card.closest<HTMLElement>('[data-project-id]')!.dataset.projectId!));
+    gsap.set(cards, { autoAlpha: 0, y: 64, filter: 'blur(6px)' });
+    ScrollTrigger.batch(cards, {
+      start: 'top 90%', once: true, interval: .12,
+      onEnter: batch => { context.add(() => { gsap.to(batch, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .85, stagger: .16, ease: 'power3.out', overwrite: true }); }); },
+    });
+    const frame = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(frame);
+  }, { scope: section, dependencies: [filter, reduced], revertOnUpdate: true });
+  return <section ref={section} id="projects" className="editorial-section">
     <SectionIntro title="Projects." />
     <div className="work-toolbar"><div className="filter-list" role="group" aria-label="Filter projects">{filters.map(item => <button key={item} onClick={() => setFilter(item)} aria-pressed={filter === item} className={`filter-button ${filter === item ? 'active' : ''}`}>{filter === item && <motion.span className="filter-active" layoutId="work-filter" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}<span>{item}</span></button>)}</div><span className="work-count" aria-live="polite">{visible.length} {visible.length === 1 ? 'project' : 'projects'}</span></div>
-    <motion.div layout={!reduced} onLayoutAnimationComplete={() => ScrollTrigger.refresh()} className="work-grid"><AnimatePresence mode="popLayout" initial={false}>{visible.map(project => <motion.article layout={!reduced} className={project.id === 6 ? 'work-featured' : undefined} key={project.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .35 }}>
-      <motion.button {...reveal} type="button" onClick={() => onSelect(project.id)} className="work-card group" aria-label={`Explore ${project.name}`} whileHover={reduced ? {} : { y: -6 }} whileTap={reduced ? {} : { scale: .985 }}>
+    <motion.div layout={!reduced} onLayoutAnimationComplete={() => ScrollTrigger.refresh()} className="work-grid"><AnimatePresence mode="popLayout" initial={false}>{visible.map(project => <motion.article data-project-id={project.id} layout={!reduced} className={project.id === 6 ? 'work-featured' : undefined} key={project.id} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .35 }}>
+      <div className="work-card-reveal"><motion.button type="button" onClick={() => onSelect(project.id)} className="work-card group" aria-label={`Explore ${project.name}`} whileHover={reduced ? {} : { y: -6 }} whileTap={reduced ? {} : { scale: .985 }}>
         <div className="work-art"><ProjectPreview image={project.image} detailImages={project.detailImages} name={project.name} /></div><div className="work-card-copy"><div className="work-info"><div><span>{project.category}</span><h3>{project.name}</h3></div><span className="work-card-arrow"><ArrowUpRight size={24} /></span></div><p className="work-description">{project.description}</p></div>
-      </motion.button>
+      </motion.button></div>
     </motion.article>)}</AnimatePresence></motion.div>
     {createPortal(<AnimatePresence>{selected && <ProjectDialog key={selected.id} project={selected} onClose={closeRef.current} />}</AnimatePresence>, document.body)}
   </section>;
