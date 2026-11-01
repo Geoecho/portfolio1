@@ -5,24 +5,25 @@ import { useMotionPreference } from '../hooks/useMotionPreference';
 
 const links = [
   { label: 'Home', id: 'intro', icon: Home },
-  { label: 'Work', id: 'featured-work', icon: Image },
+  { label: 'Work', id: 'projects', icon: Image },
   { label: 'About', id: 'characteristics', icon: User },
   { label: 'Approach', id: 'philosophy', icon: Layers },
   { label: 'Tools', id: 'skills', icon: PenTool },
   { label: 'Playground', id: 'aesthetics', icon: Sparkles },
 ];
 
-export default function Navigation({ onHome }: { onHome: () => void }) {
+export default function Navigation({ onHome, onContact }: { onHome: () => void; onContact: () => void }) {
   const [active, setActive] = useState('intro');
   const [menu, setMenu] = useState(false);
   const reduced = useMotionPreference();
   const indicator = reduced ? { duration: 0 } : { type: 'spring' as const, stiffness: 420, damping: 34 };
   const navigate = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
     setMenu(false);
-    if (id !== 'intro' || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    if (!['intro', 'contact'].includes(id) || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
-    onHome();
+    if (id === 'contact') onContact();
+    else onHome();
   };
   useEffect(() => {
     document.documentElement.classList.remove('dark');
@@ -65,7 +66,7 @@ export default function Navigation({ onHome }: { onHome: () => void }) {
         {active === id && <motion.span className="dock-active" layoutId="desktop-navigation-active" transition={indicator} />}
         <motion.span className="nav-icon" initial={false} animate={{ scale: active === id && !reduced ? [1, 1.12, 1] : 1 }} transition={{ duration: reduced ? 0 : .35 }}><Icon size={18} /></motion.span><span className="nav-label">{label}</span>
       </a>)}</div>
-      <a className="dock-contact" href="#contact" onClick={() => setMenu(false)}>Let's talk <ArrowUpRight size={17} /></a>
+      <a className="dock-contact" href="#contact" onClick={event => navigate(event, 'contact')}>Let's talk <ArrowUpRight size={17} /></a>
     </div>
     <AnimatePresence initial={false}>{menu && <motion.div id="mobile-navigation" className="dock-menu" initial={{ opacity: 0, y: reduced ? 0 : 12, filter: reduced ? 'none' : 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: reduced ? 0 : 8, filter: reduced ? 'none' : 'blur(4px)' }} transition={{ duration: reduced ? 0 : .2 }}>{links.map(({ label, id, icon: Icon }) => <a key={id} href={id === 'intro' ? '#' : `#${id}`} onClick={event => navigate(event, id)} aria-current={active === id ? 'location' : undefined}>
       {active === id && <motion.span className="dock-active" layoutId="mobile-menu-active" transition={indicator} />}

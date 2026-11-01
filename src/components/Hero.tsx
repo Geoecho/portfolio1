@@ -3,7 +3,7 @@ import { ArrowUpRight, ArrowDown } from './AnimatedIcons';
 import { gsap, useGSAP } from '../lib/scrollMotion';
 import HeroProjectStack from './HeroProjectStack';
 
-export default function Hero({ onOpenProject }: { onOpenProject: (id: number) => void }) {
+export default function Hero({ onOpenProject, onContact }: { onOpenProject: (id: number) => void; onContact: () => void }) {
   const section = useRef<HTMLElement>(null);
   useGSAP(() => {
     const media = gsap.matchMedia();
@@ -20,7 +20,7 @@ export default function Hero({ onOpenProject }: { onOpenProject: (id: number) =>
   return <section ref={section} id="intro" className="hero-section">
     <div className="hero-layout"><div className="hero-copy"><h1 className="hero-reveal hero-title">Make it simple.<br /><span>Make it work.</span></h1><p className="hero-reveal hero-description">I design websites and apps that make the next step feel obvious.</p></div>
       <div className="hero-feature-depth"><HeroProjectStack onOpenProject={onOpenProject} /></div>
-      <div className="hero-reveal hero-actions"><a href="#projects" className="hero-cta">View projects <ArrowDown size={18} /></a><a href="#contact" className="hero-secondary">Contact <ArrowUpRight size={18} /></a></div>
+      <div className="hero-reveal hero-actions"><a href="#projects" className="hero-cta">View projects <ArrowDown size={18} /></a><a href="#contact" className="hero-secondary" onClick={event => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); onContact(); }}>Contact <ArrowUpRight size={18} /></a></div>
     </div>
   </section>;
 }

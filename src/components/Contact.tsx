@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, Check, Loader2 } from './AnimatedIcons';
 import { reveal } from './SectionIntro';
 import SocialLinks from './SocialLinks';
-const Contact = ({ onBackToTop }: { onBackToTop: () => void }) => {
+const Contact = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [email, setEmail] = useState('');
@@ -74,7 +74,7 @@ const Contact = ({ onBackToTop }: { onBackToTop: () => void }) => {
         </motion.form>}
       </AnimatePresence></div>
     </motion.div>
-    <footer className="portfolio-footer"><p>Hristijan Bristić</p><div className="footer-links"><a className="text-link" href="/privacy" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</a><button type="button" className="text-link" onClick={onBackToTop}>Back to top <ArrowUpRight size={16} /></button></div></footer>
+    <footer className="portfolio-footer"><p>Hristijan Bristić</p><div className="footer-links"><a className="text-link" href="/privacy" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</a></div></footer>
   </section>;
 };
 

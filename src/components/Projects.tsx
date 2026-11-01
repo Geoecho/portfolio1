@@ -6,7 +6,7 @@ import { projects } from '../data/projects';
 import { SectionIntro } from './SectionIntro';
 import { gsap, ScrollTrigger, useGSAP } from '../lib/scrollMotion';
 import { useMotionPreference } from '../hooks/useMotionPreference';
-import ProjectPreview from './ProjectPreview';
+import ScrollIndicator, { setScrollIndicator } from './ScrollIndicator';
 
 type Project = typeof projects[number];
 const filters = ['All work', 'Websites', 'Apps', 'Interactions'] as const;
@@ -64,26 +64,86 @@ export default function Projects({ selectedId, onSelect }: { selectedId: number 
   const visible = orderedProjects.filter(project => filter === 'All work' || (filter === 'Websites' && project.category.includes('Website')) || (filter === 'Apps' && project.category === 'App Design') || (filter === 'Interactions' && project.category === 'Login Screen'));
   const closeRef = useRef(() => onSelect(null));
   const section = useRef<HTMLElement>(null);
-  useGSAP(context => {
-    if (reduced) return;
-    const ids = new Set(visible.map(project => String(project.id)));
-    const cards = gsap.utils.toArray<HTMLElement>('.work-card-reveal', section.current!).filter(card => ids.has(card.closest<HTMLElement>('[data-project-id]')!.dataset.projectId!));
-    gsap.set(cards, { autoAlpha: 0, y: 64, filter: 'blur(6px)' });
-    ScrollTrigger.batch(cards, {
-      start: 'top 90%', once: true, interval: .12,
-      onEnter: batch => { context.add(() => { gsap.to(batch, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .85, stagger: .16, ease: 'power3.out', overwrite: true }); }); },
+  const focusProject = useRef<(index: number) => void>(() => undefined);
+  useGSAP(() => {
+    const root = section.current!;
+    const stage = root.querySelector<HTMLElement>('.work-grid')!;
+    const cards = Array.from(stage.querySelectorAll<HTMLElement>(':scope > article'));
+    const media = gsap.matchMedia();
+    media.add({ motion: '(prefers-reduced-motion: no-preference)', space: '(min-height: 640px)' }, match => {
+      if (!match.conditions?.motion || !match.conditions.space) {
+        if (match.conditions?.motion) cards.forEach(card => gsap.from(card, { autoAlpha: 0, y: 32, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: card, start: 'top 90%', once: true } }));
+        return;
+      }
+      root.classList.add('work-stack');
+      const position = (slot: number) => ({ y: slot * 18, scale: 1 - slot * .045, filter: `blur(${slot * 3}px)`, autoAlpha: slot < 3 ? 1 : 0 });
+      cards.forEach((card, index) => gsap.set(card, { ...position(Math.min(index, 3)), zIndex: cards.length - index, yPercent: 0 }));
+      let active = -1;
+      const showActive = (index: number) => {
+        if (active === index) return;
+        active = index;
+        root.dataset.projectIndex = String(index);
+        cards.forEach((card, i) => { card.dataset.front = String(i === index); });
+        setScrollIndicator(root.querySelector('.work-stack-indicator'), index, visible[index].name);
+      };
+      showActive(0);
+      if (cards.length === 1) return () => {
+        root.classList.remove('work-stack');
+        delete root.dataset.projectIndex;
+        cards.forEach(card => { delete card.dataset.front; });
+      };
+
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          id: 'project-stack', trigger: stage,
+          start: () => `top ${(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-bar-clearance')) || 92) + 12}px`,
+          end: () => `+=${Math.max(480, window.innerHeight * .78) * (cards.length - 1)}`,
+          pin: true, pinSpacing: true, scrub: .4, anticipatePin: 1,
+        },
+      });
+      for (let index = 0; index < cards.length - 1; index++) {
+        const at = index + .35;
+        timeline.fromTo(cards[index], { ...position(0), yPercent: 0 }, { y: -28, yPercent: -18, scale: .96, autoAlpha: 0, filter: 'blur(8px)', duration: .65, ease: 'power2.inOut', immediateRender: false }, at);
+        for (let next = index + 1; next < Math.min(cards.length, index + 4); next++) {
+          timeline.fromTo(cards[next], { ...position(next - index), yPercent: 0 }, { ...position(next - index - 1), duration: .65, ease: 'power2.inOut', immediateRender: false }, at);
+        }
+      }
+      timeline.to({}, { duration: .5 }, cards.length - 1);
+      timeline.eventCallback('onUpdate', () => showActive(Math.min(cards.length - 1, Math.floor(timeline.time() + .25))));
+      // Tabbing to the next card also brings it to the front of the scroll scene.
+      let focusFrame = 0;
+      focusProject.current = index => {
+        if (index === active) return;
+        cancelAnimationFrame(focusFrame);
+        // Wait for the browser's own focus scrolling before positioning the scene.
+        focusFrame = requestAnimationFrame(() => {
+          const trigger = timeline.scrollTrigger!;
+          const progress = (index + .12) / timeline.duration();
+          window.scrollTo({ top: trigger.start + (trigger.end - trigger.start) * progress, behavior: 'instant' });
+          ScrollTrigger.update();
+          trigger.getTween()?.progress(1);
+          timeline.progress(progress);
+        });
+      };
+      return () => {
+        cancelAnimationFrame(focusFrame);
+        focusProject.current = () => undefined;
+        root.classList.remove('work-stack');
+        delete root.dataset.projectIndex;
+        cards.forEach(card => { delete card.dataset.front; });
+      };
     });
     const frame = requestAnimationFrame(() => ScrollTrigger.refresh());
-    return () => cancelAnimationFrame(frame);
+    return () => { cancelAnimationFrame(frame); media.revert(); };
   }, { scope: section, dependencies: [filter, reduced], revertOnUpdate: true });
   return <section ref={section} id="projects" className="editorial-section">
     <SectionIntro title="Projects." />
     <div className="work-toolbar"><div className="filter-list" role="group" aria-label="Filter projects">{filters.map(item => <button key={item} onClick={() => setFilter(item)} aria-pressed={filter === item} className={`filter-button ${filter === item ? 'active' : ''}`}>{filter === item && <motion.span className="filter-active" layoutId="work-filter" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}<span>{item}</span></button>)}</div><span className="work-count" aria-live="polite">{visible.length} {visible.length === 1 ? 'project' : 'projects'}</span></div>
-    <motion.div layout={!reduced} onLayoutAnimationComplete={() => ScrollTrigger.refresh()} className="work-grid"><AnimatePresence mode="popLayout" initial={false}>{visible.map(project => <motion.article data-project-id={project.id} layout={!reduced} className={project.id === 6 ? 'work-featured' : undefined} key={project.id} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .35 }}>
-      <div className="work-card-reveal"><motion.button type="button" onClick={() => onSelect(project.id)} className="work-card group" aria-label={`Explore ${project.name}`} whileHover={reduced ? {} : { y: -6 }} whileTap={reduced ? {} : { scale: .985 }}>
-        <div className="work-art"><ProjectPreview image={project.image} detailImages={project.detailImages} name={project.name} /></div><div className="work-card-copy"><div className="work-info"><div><span>{project.category}</span><h3>{project.name}</h3></div><span className="work-card-arrow"><ArrowUpRight size={24} /></span></div><p className="work-description">{project.description}</p></div>
+    <div className="work-grid">{visible.map((project, index) => <article data-project-id={project.id} className={project.id === 6 ? 'work-featured' : undefined} key={project.id}>
+      <div className="work-card-reveal"><motion.button type="button" onFocus={() => focusProject.current(index)} onClick={() => onSelect(project.id)} className="work-card group" aria-label={`Explore ${project.name}`} whileTap={reduced ? {} : { scale: .985 }}>
+        <div className="work-art"><img src={project.image} alt={`${project.name} design preview`} loading="lazy" /></div><div className="work-card-copy"><div className="work-info"><div><span>{project.category}</span><h3>{project.name}</h3></div><span className="work-card-arrow"><ArrowUpRight size={24} /></span></div><p className="work-description">{project.description}</p></div>
       </motion.button></div>
-    </motion.article>)}</AnimatePresence></motion.div>
+    </article>)}<ScrollIndicator labels={visible.map(project => project.name)} label="Project progress" className="work-stack-indicator" /></div>
     {createPortal(<AnimatePresence>{selected && <ProjectDialog key={selected.id} project={selected} onClose={closeRef.current} />}</AnimatePresence>, document.body)}
   </section>;
 }

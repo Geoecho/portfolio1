@@ -8,13 +8,13 @@ import DesignPhilosophy from './components/DesignPhilosophy';
 import Aesthetics from './components/Playground';
 import Contact from './components/Contact';
 import Navigation from './components/Navigation';
-import FeaturedProject from './components/FeaturedProject';
 import { useLenis } from './hooks/useLenis';
 import TopBar from './components/TopBar';
 import BackToTop from './components/BackToTop';
+import KineticGrid from './components/KineticGrid';
 
 function App() {
-  const scrollToTop = useLenis();
+  const { scrollToTop, scrollToContact } = useLenis();
   const progressBarRef = useRef<HTMLDivElement>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
@@ -37,7 +37,8 @@ function App() {
   return (
     <MotionConfig reducedMotion="user">
     <div className="min-h-screen text-theme-primary selection:bg-primary selection:text-white portfolio-root">
-      <a href="#featured-work" className="skip-link">Skip to work</a>
+      <KineticGrid />
+      <a href="#projects" className="skip-link">Skip to work</a>
       <div className="fixed top-0 left-0 right-0 h-0.5 z-[200] pointer-events-none">
         <div
           ref={progressBarRef}
@@ -45,21 +46,20 @@ function App() {
           style={{ transform: 'scaleX(0)', transformOrigin: 'left' }}
         />
       </div>
-      <Navigation onHome={scrollToTop} />
+      <Navigation onHome={scrollToTop} onContact={scrollToContact} />
       <TopBar />
       <BackToTop onActivate={scrollToTop} />
 
 
       <main className="portfolio-panel relative z-10 max-w-7xl mx-auto px-5 sm:px-10 lg:px-16">
         <div>
-          <Hero onOpenProject={setSelectedProjectId} />
-          <FeaturedProject />
+          <Hero onOpenProject={setSelectedProjectId} onContact={scrollToContact} />
           <Projects selectedId={selectedProjectId} onSelect={setSelectedProjectId} />
           <Characteristics />
           <DesignPhilosophy />
           <Skills />
           <Aesthetics />
-          <Contact onBackToTop={scrollToTop} />
+          <Contact />
         </div>
       </main>
     </div>
