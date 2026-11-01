@@ -31,6 +31,7 @@ import { UserIcon } from './icons/user';
 import { PauseIcon } from './icons/pause';
 import { PlayIcon } from './icons/play';
 import { AudioLinesIcon } from './icons/audio-lines';
+import { GamepadIcon } from './icons/gamepad';
 
 type Handle = { startAnimation: () => void; stopAnimation: () => void };
 type SourceIcon = ComponentType<HTMLAttributes<HTMLSpanElement> & { size?: number } & RefAttributes<Handle>>;
@@ -102,3 +103,4 @@ export const User = animated(UserIcon, 'user');
 export const Pause = animated(PauseIcon, 'pause');
 export const Play = animated(PlayIcon, 'play');
 export const Music = animated(AudioLinesIcon, 'audio-lines');
+export const Gamepad = animated(GamepadIcon, 'gamepad');
