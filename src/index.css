@@ -955,7 +955,7 @@ html.lenis,html.lenis body { height: auto; }
 @media (prefers-reduced-motion: reduce) {
   .rush-combo-meter > span, .rush-rank-track > span { transition: none; }
 }
-.hero-stack-scene { touch-action: pan-y pinch-zoom; user-select: none; -webkit-user-select: none; }
+.hero-stack-scene { touch-action: pan-x pan-y pinch-zoom; user-select: none; -webkit-user-select: none; }
 .hero-stack-art img { -webkit-user-drag: none; pointer-events: none; }
 .dialog-back { display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; min-height: 44px; padding: 8px 12px 8px 0; margin-right: auto; font-size: 13px; font-weight: 550; }
 .dialog-back .animated-lucide { color: #d60000; }
@@ -982,4 +982,16 @@ html.lenis,html.lenis body { height: auto; }
   .rush-field[data-phase="ready"] .rush-modes { margin: 12px 0; }
   .rush-field[data-phase="ready"] .rush-modes > button { min-height: 44px; padding: 6px 10px; }
   .rush-field[data-phase="ready"] .rush-start { min-height: 44px; padding-top: 10px; padding-bottom: 10px; }
+}
+
+/* Native touch momentum drives every visible layer of the project stack. */
+.hero-stack-visuals { position: absolute; inset: 0; pointer-events: none; }
+.hero-stack-visuals .hero-stack-card { pointer-events: none; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.hero-stack-track { position: absolute; top: 0; bottom: 0; left: 0; right: -24px; z-index: 3000; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; touch-action: pan-x pan-y pinch-zoom; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.hero-stack-track::-webkit-scrollbar { display: none; }
+.hero-stack-hit { flex: 0 0 100%; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 24px; background: transparent; scroll-snap-align: start; scroll-snap-stop: always; }
+.hero-stack-hit:focus-visible { outline: 2px solid #d60000; outline-offset: -3px; }
+@media (max-width: 767px) {
+  .hero-stack-track { right: -20px; }
+  .hero-stack-hit { border-radius: 20px; }
 }
