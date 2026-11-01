@@ -1,315 +1,75 @@
-import { useState, useEffect } from 'react';
-import { Home, Send, Menu, X, Sun, Moon } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+import { useEffect, useState, type MouseEvent } from 'react';
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import { Home, Image, User, Layers, PenTool, Sparkles, Menu, X, ArrowUpRight } from './AnimatedIcons';
+import { useMotionPreference } from '../hooks/useMotionPreference';
 
-const smoothScrollTo = (targetY: number, duration = 1000) => {
-  const startY = window.pageYOffset || window.scrollY || 0;
-  const distance = targetY - startY;
-  let startTime: number | null = null;
+const links = [
+  { label: 'Home', id: 'intro', icon: Home },
+  { label: 'Work', id: 'featured-work', icon: Image },
+  { label: 'About', id: 'characteristics', icon: User },
+  { label: 'Approach', id: 'philosophy', icon: Layers },
+  { label: 'Tools', id: 'skills', icon: PenTool },
+  { label: 'Playground', id: 'aesthetics', icon: Sparkles },
+];
 
-  const step = (currentTime: number) => {
-    if (startTime === null) startTime = currentTime;
-    const progress = Math.min(1, (currentTime - startTime) / duration);
-    const eased = easeInOutQuad(progress);
-    window.scrollTo(0, startY + distance * eased);
-    if (progress < 1) {
-      window.requestAnimationFrame(step);
-    }
+export default function Navigation({ onHome }: { onHome: () => void }) {
+  const [active, setActive] = useState('intro');
+  const [menu, setMenu] = useState(false);
+  const reduced = useMotionPreference();
+  const indicator = reduced ? { duration: 0 } : { type: 'spring' as const, stiffness: 420, damping: 34 };
+  const navigate = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
+    setMenu(false);
+    if (id !== 'intro' || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onHome();
   };
-
-  window.requestAnimationFrame(step);
-};
-
-const Navigation = () => {
-  const [activeSection, setActiveSection] = useState('intro');
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window === 'undefined') return 'dark';
-
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'light' || storedTheme === 'dark') {
-      return storedTheme;
-    }
-
-    // Default to dark if no preference is stored
-    return 'dark';
-  });
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const navItems = [
-    { name: 'Skills', href: '#skills' },
-    { name: 'About', href: '#characteristics' },
-    { name: 'Work', href: '#projects' },
-    { name: 'Philosophy', href: '#philosophy' },
-    { name: 'Aesthetics', href: '#aesthetics' },
-  ];
-
   useEffect(() => {
-    const allSections = [
-      { name: 'Intro', href: '#intro' },
-      ...navItems,
-      { name: 'Contact', href: '#contact' }
-    ];
-
-    const sections = allSections.map(item => document.getElementById(item.href.substring(1)));
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      {
-        threshold: 0.3,
-        rootMargin: '-20% 0px -20% 0px'
-      }
-    );
-
-    sections.forEach((section) => {
-      if (section) observer.observe(section);
-    });
-
-    return () => {
-      sections.forEach((section) => {
-        if (section) observer.unobserve(section);
+    document.documentElement.classList.remove('dark');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#ffffff');
+  }, []);
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const ids = [...links.map(item => item.id), 'contact'];
+        const current = ids.filter(id => (document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= window.innerHeight * .35).pop();
+        setActive(current || 'intro');
       });
     };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
   }, []);
-
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const root = document.documentElement;
+    if (!menu) return;
+    document.querySelector<HTMLElement>('#mobile-navigation a[aria-current]')?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setMenu(false); document.getElementById('mobile-menu-toggle')?.focus(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [menu]);
 
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-
-    // Enforce theme color by replacing any existing tags
-    // Enforce theme color by updating the existing tag
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', theme === 'dark' ? '#050505' : '#ffffff');
-    }
-
-    // Update iOS status bar style
-    const metaAppleStatus = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-    if (metaAppleStatus) {
-      metaAppleStatus.setAttribute('content', theme === 'dark' ? 'black-translucent' : 'default');
-    }
-
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
-
-  const handleClick = (href: string) => {
-    const sectionId = href.substring(1);
-    setActiveSection(sectionId);
-    setIsMenuOpen(false);
-    const element = document.getElementById(sectionId);
-
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || window.scrollY || 0;
-      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-
-      let targetY: number;
-
-      if (isDesktop) {
-        // Center the section vertically in the viewport
-        const sectionAbsTop = rect.top + scrollTop;
-        targetY = sectionAbsTop + rect.height / 2 - window.innerHeight / 2;
-      } else {
-        // Consistent 80px from top on mobile
-        targetY = rect.top + scrollTop - 80;
-      }
-
-      smoothScrollTo(Math.max(targetY, 0), 900);
-    }
-  };
-
-  return (
-    <>
-      {/* Desktop Navigation (lg and up) */}
-      <nav className="hidden lg:block fixed bottom-6 inset-x-0 z-50">
-        <div className="flex justify-center px-4">
-          <div className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-full backdrop-blur-md w-auto nav-surface nav-shadow">
-            {/* Home Icon */}
-            <motion.button
-              whileHover={{ rotate: -4, scale: 1.05 }}
-              whileTap={{ scale: 0.95, rotate: 8 }}
-              onClick={() => handleClick('#intro')}
-              className={`p-2.5 rounded-full transition-colors duration-300 flex items-center justify-center ${activeSection === 'intro'
-                ? 'bg-primary text-white'
-                : 'chip-surface hover:bg-black/5 dark:hover:bg-white/10'
-                }`}
-              aria-label="Home"
-            >
-              <Home size={18} strokeWidth={2.25} />
-            </motion.button>
-
-            {/* Middle Links */}
-            {navItems.map((item) => {
-              const isActive = activeSection === item.href.substring(1);
-              return (
-                <motion.button
-                  key={item.name}
-                  whileHover={{ y: -1, scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleClick(item.href)}
-                  className={`relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 rounded-full whitespace-nowrap ${isActive ? 'bg-primary text-white' : 'text-theme-primary'
-                    }`}
-                >
-                  {item.name}
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-pill"
-                      className="absolute inset-0 rounded-full -z-10 bg-primary"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
-
-            {/* Contact CTA */}
-            <motion.button
-              whileHover={{ rotate: 3, scale: 1.06, y: -1 }}
-              whileTap={{ scale: 0.94, rotate: -6 }}
-              onClick={() => handleClick('#contact')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 whitespace-nowrap ${activeSection === 'contact'
-                ? 'bg-primary text-white shadow-lg'
-                : 'bg-primary text-white hover:bg-primary/90'
-                }`}
-            >
-              <span>Let's talk</span>
-              <Send size={16} strokeWidth={2.25} />
-            </motion.button>
-
-            {/* Theme Toggle */}
-            <motion.button
-              whileHover={{ scale: 1.06, rotate: theme === 'dark' ? 8 : -8 }}
-              whileTap={{ scale: 0.92, rotate: theme === 'dark' ? 18 : -18 }}
-              onClick={toggleTheme}
-              className="h-10 w-10 rounded-full chip-surface flex items-center justify-center transition-colors duration-300 hover:bg-black/5 dark:hover:bg-white/10"
-              aria-label="Toggle theme"
-            >
-              <motion.span
-                key={theme}
-                initial={{ rotate: -12, scale: 0.95, opacity: 0.7 }}
-                animate={{ rotate: 0, scale: 1, opacity: 1 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="inline-flex"
-              >
-                {theme === 'dark' ? <Sun size={18} strokeWidth={2.25} /> : <Moon size={18} strokeWidth={2.25} />}
-              </motion.span>
-            </motion.button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile/Tablet Navigation (below lg) */}
-      <nav className="lg:hidden fixed bottom-6 inset-x-0 z-50">
-        <div className="flex justify-center w-full">
-          {/* Compact Nav Bar */}
-          <div className="mx-auto flex items-center gap-2 px-3 py-2.5 rounded-full backdrop-blur-md nav-surface nav-shadow w-[calc(100%-2rem)] max-w-md">
-            {/* Home */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleClick('#intro')}
-              className={`p-2.5 rounded-full transition-colors duration-300 ${activeSection === 'intro'
-                ? 'bg-primary text-white'
-                : 'chip-surface'
-                }`}
-              aria-label="Home"
-            >
-              <Home size={18} strokeWidth={2.25} />
-            </motion.button>
-
-            {/* Menu Toggle */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2.5 rounded-full chip-surface transition-colors duration-300 hover:bg-black/5 dark:hover:bg-white/10"
-              aria-label="Menu"
-            >
-              {isMenuOpen ? <X size={18} strokeWidth={2.25} /> : <Menu size={18} strokeWidth={2.25} />}
-            </motion.button>
-
-            {/* Theme Toggle */}
-            <motion.button
-              whileHover={{ scale: 1.06, rotate: theme === 'dark' ? 8 : -8 }}
-              whileTap={{ scale: 0.92, rotate: theme === 'dark' ? 18 : -18 }}
-              onClick={toggleTheme}
-              className="h-10 w-10 rounded-full chip-surface flex items-center justify-center transition-colors duration-300 hover:bg-black/5 dark:hover:bg-white/10"
-              aria-label="Toggle theme"
-            >
-              <motion.span
-                key={theme}
-                initial={{ rotate: -12, scale: 0.95, opacity: 0.7 }}
-                animate={{ rotate: 0, scale: 1, opacity: 1 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="inline-flex"
-              >
-                {theme === 'dark' ? <Sun size={18} strokeWidth={2.25} /> : <Moon size={18} strokeWidth={2.25} />}
-              </motion.span>
-            </motion.button>
-
-            {/* Contact CTA */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleClick('#contact')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 ${activeSection === 'contact'
-                ? 'bg-primary text-white'
-                : 'bg-primary text-white hover:bg-primary/90'
-                }`}
-            >
-              <span>Let's talk</span>
-              <Send size={16} strokeWidth={2.25} />
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Expandable Menu - Centered on Screen */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 6, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 6, scale: 0.96 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="fixed bottom-[calc(100px+10px)] inset-x-0 z-50 px-4"
-            >
-              <div className="mx-auto w-full max-w-xs sm:max-w-md p-3 rounded-2xl backdrop-blur-md nav-surface nav-shadow max-h-[60vh] overflow-y-auto">
-                <div className="flex flex-col gap-2 items-stretch text-center">
-                  {navItems.map((item) => {
-                    const isActive = activeSection === item.href.substring(1);
-                    return (
-                      <motion.button
-                        key={item.name}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => handleClick(item.href)}
-                        className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                          ? 'bg-primary text-white shadow-lg'
-                          : 'chip-surface hover:bg-black/5 dark:hover:bg-white/10'
-                          }`}
-                      >
-                        {item.name}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-    </>
-
-  );
-};
-
-export default Navigation;
+  return <div className="site-dock">
+    <nav className="navigation-dock" aria-label="Main navigation"><LayoutGroup id="portfolio-navigation">
+    <div className="dock-bar">
+      <a href="#" className={`dock-mobile-home ${active === 'intro' ? 'active' : ''}`} aria-current={active === 'intro' ? 'location' : undefined} onClick={event => navigate(event, 'intro')}>
+        {active === 'intro' && <motion.span className="dock-active" layoutId="mobile-home-active" transition={indicator} />}
+        <span className="nav-icon"><Home size={18} /></span><span className="nav-label">Home</span>
+      </a>
+      <button className="dock-icon mobile-menu-toggle" id="mobile-menu-toggle" aria-expanded={menu} aria-controls="mobile-navigation" aria-label={menu ? 'Close menu' : 'Open menu'} onClick={() => setMenu(!menu)}>{menu ? <X size={19} /> : <Menu size={19} />}</button>
+      <div className="dock-links">{links.map(({ label, id, icon: Icon }) => <a key={id} href={id === 'intro' ? '#' : `#${id}`} onClick={event => navigate(event, id)} className={`dock-nav-item ${active === id ? 'active' : ''}`} aria-current={active === id ? 'location' : undefined}>
+        {active === id && <motion.span className="dock-active" layoutId="desktop-navigation-active" transition={indicator} />}
+        <motion.span className="nav-icon" initial={false} animate={{ scale: active === id && !reduced ? [1, 1.12, 1] : 1 }} transition={{ duration: reduced ? 0 : .35 }}><Icon size={18} /></motion.span><span className="nav-label">{label}</span>
+      </a>)}</div>
+      <a className="dock-contact" href="#contact" onClick={() => setMenu(false)}>Let's talk <ArrowUpRight size={17} /></a>
+    </div>
+    <AnimatePresence initial={false}>{menu && <motion.div id="mobile-navigation" className="dock-menu" initial={{ opacity: 0, y: reduced ? 0 : 12, filter: reduced ? 'none' : 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: reduced ? 0 : 8, filter: reduced ? 'none' : 'blur(4px)' }} transition={{ duration: reduced ? 0 : .2 }}>{links.map(({ label, id, icon: Icon }) => <a key={id} href={id === 'intro' ? '#' : `#${id}`} onClick={event => navigate(event, id)} aria-current={active === id ? 'location' : undefined}>
+      {active === id && <motion.span className="dock-active" layoutId="mobile-menu-active" transition={indicator} />}
+      <span className="nav-icon"><Icon size={19} /></span><span className="nav-label">{label}</span>
+    </a>)}</motion.div>}</AnimatePresence>
+  </LayoutGroup></nav></div>;
+}

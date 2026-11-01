@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { MotionConfig } from 'framer-motion';
 import Hero from './components/Hero';
 import Skills from './components/Skills';
 import Characteristics from './components/Characteristics';
@@ -7,21 +8,14 @@ import DesignPhilosophy from './components/DesignPhilosophy';
 import Aesthetics from './components/Playground';
 import Contact from './components/Contact';
 import Navigation from './components/Navigation';
-import BackgroundIcons from './components/BackgroundIcons';
+import FeaturedProject from './components/FeaturedProject';
 import { useLenis } from './hooks/useLenis';
-import CustomCursor from './components/CustomCursor';
+import TopBar from './components/TopBar';
 
 function App() {
-  useLenis();
+  const scrollToTop = useLenis();
   const progressBarRef = useRef<HTMLDivElement>(null);
-
-  // Force scroll to top on mount/refresh
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-  }, []);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
   // Track scroll progress — direct DOM write, no re-render
   useEffect(() => {
@@ -34,44 +28,40 @@ function App() {
         progressBarRef.current.style.transform = `scaleX(${progress})`;
       }
     };
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
-    <div className="min-h-screen text-theme-primary selection:bg-primary selection:text-white overflow-hidden">
-      <CustomCursor />
-      {/* Mobile scroll progress bar */}
-      <div className="fixed top-0 left-0 right-0 h-0.5 z-[200] lg:hidden pointer-events-none">
+    <MotionConfig reducedMotion="user">
+    <div className="min-h-screen text-theme-primary selection:bg-primary selection:text-white portfolio-root">
+      <a href="#featured-work" className="skip-link">Skip to work</a>
+      <div className="fixed top-0 left-0 right-0 h-0.5 z-[200] pointer-events-none">
         <div
           ref={progressBarRef}
           className="h-full bg-primary"
           style={{ transform: 'scaleX(0)', transformOrigin: 'left' }}
         />
       </div>
-      <Navigation />
-      <div className="grid-background fixed inset-0 z-0 pointer-events-none" />
-      <BackgroundIcons />
+      <Navigation onHome={scrollToTop} />
+      <TopBar onBackToTop={scrollToTop} />
 
-      {/* Vignettes - soft and uniform on all sides (desktop) */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 h-32 z-[5] vignette-top" />
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 h-32 z-[5] vignette-bottom" />
-      <div className="pointer-events-none fixed inset-y-0 left-0 w-32 z-[5] vignette-left hidden lg:block" />
-      <div className="pointer-events-none fixed inset-y-0 right-0 w-32 z-[5] vignette-right hidden lg:block" />
-      <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f8fafc] dark:from-[#050505] to-transparent z-[40] pointer-events-none lg:hidden" />
 
-      <div className="relative z-10 max-w-7xl mx-auto mt-0 sm:mt-10 mb-0 sm:mb-16 lg:mb-24 px-4 sm:px-6 lg:px-8 rounded-none sm:rounded-3xl panel-surface overflow-hidden">
-<div className="space-y-8 sm:space-y-12">
-          <Hero />
-          <Skills />
+      <main className="portfolio-panel relative z-10 max-w-7xl mx-auto px-5 sm:px-10 lg:px-16">
+        <div>
+          <Hero onOpenProject={setSelectedProjectId} />
+          <FeaturedProject />
+          <Projects selectedId={selectedProjectId} onSelect={setSelectedProjectId} />
           <Characteristics />
-          <Projects />
           <DesignPhilosophy />
+          <Skills />
           <Aesthetics />
-          <Contact />
+          <Contact onBackToTop={scrollToTop} />
         </div>
-      </div>
+      </main>
     </div>
+    </MotionConfig>
   );
 }
 

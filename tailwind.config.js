@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#FF6B6B',
+        primary: '#d60000',
         secondary: '#F5F5F5',
         dark: '#1A1A1A',
         background: 'hsl(var(--background))',

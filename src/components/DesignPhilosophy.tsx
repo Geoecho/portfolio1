@@ -1,144 +1,66 @@
+import { useRef } from 'react';
+import { Layers, Type, MousePointer2 } from './AnimatedIcons';
+import FeedbackButton from './FeedbackButton';
+import { SectionIntro } from './SectionIntro';
+import { gsap, ScrollTrigger, useGSAP } from '../lib/scrollMotion';
+import { useSectionMotion } from '../hooks/useSectionMotion';
 
-import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Sparkles, Layers, Zap } from 'lucide-react';
+const principles = [
+  { label: 'Clarity', title: 'Make room for what matters.', text: 'One clear purpose. Fewer competing choices. I remove the friction so people can focus on what they came to do.', icon: Layers },
+  { label: 'Hierarchy', title: 'Make the next step feel natural.', text: 'Type, space, and contrast work together to guide attention. The important things should feel important.', icon: Type },
+  { label: 'Feedback', title: 'Make every interaction count.', text: 'A response at the right moment turns an action into understanding. Motion should explain what just happened.', icon: MousePointer2 },
+];
 
-
-const DesignPhilosophy = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const scrollerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = scrollerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      if (window.innerWidth >= 1024) {
-        setActiveIndex(null);
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const containerCenter = containerRect.left + containerRect.width / 2;
-
-      let closestIndex: number | null = null;
-      let minDiff = Infinity;
-
-      container.querySelectorAll('[data-scroll-item]').forEach((item) => {
-        const itemRect = item.getBoundingClientRect();
-        const itemCenter = itemRect.left + itemRect.width / 2;
-        const diff = Math.abs(containerCenter - itemCenter);
-
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIndex = Number(item.getAttribute('data-index'));
+export default function DesignPhilosophy() {
+  const section = useRef<HTMLElement>(null);
+  useSectionMotion(section, '.principle-card');
+  useGSAP(() => {
+    const media = gsap.matchMedia();
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      const cards = gsap.utils.toArray<HTMLElement>('.principle-card', section.current!);
+      const cleanups: Array<() => void> = [];
+      cards.forEach((card, index) => {
+        const timeline = gsap.timeline({ paused: true, defaults: { duration: .65, ease: 'power3.out' } });
+        if (index === 0) {
+          timeline.fromTo(card.querySelectorAll('.clarity-ui-secondary'), { opacity: 1, x: 0 }, { opacity: 0, x: i => i === 0 ? -12 : 12 }, 0)
+            .fromTo(card.querySelector('.clarity-ui-main'), { width: '32%' }, { width: '65%' }, 0);
+        } else if (index === 1) {
+          timeline.fromTo(card.querySelector('.hierarchy-ui-title'), { width: '45%', height: 7 }, { width: '100%', height: 15 }, 0)
+            .fromTo(card.querySelector('.hierarchy-ui-action'), { width: '65%' }, { width: '45%' }, 0);
+        } else {
+          timeline.fromTo(card.querySelector('.feedback-ui'), { y: 10 }, { y: 0 }, 0);
         }
+        const play = () => { timeline.timeScale(1).restart(); };
+        const reset = () => { timeline.timeScale(1.4).reverse(); };
+        const blur = (event: FocusEvent) => { if (!card.contains(event.relatedTarget as Node | null)) reset(); };
+        card.addEventListener('mouseenter', play);
+        card.addEventListener('mouseleave', reset);
+        card.addEventListener('focusin', play);
+        card.addEventListener('focusout', blur);
+        card.addEventListener('click', play);
+        ScrollTrigger.create({ trigger: card, start: 'top 85%', once: true, onEnter: play });
+        cleanups.push(() => {
+          card.removeEventListener('mouseenter', play);
+          card.removeEventListener('mouseleave', reset);
+          card.removeEventListener('focusin', play);
+          card.removeEventListener('focusout', blur);
+          card.removeEventListener('click', play);
+        });
       });
+      return () => cleanups.forEach(cleanup => cleanup());
+    });
+    return () => media.revert();
+  }, { scope: section });
 
-      if (closestIndex !== null) {
-        setActiveIndex(closestIndex);
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
-    handleScroll();
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, []);
-  const principles = [
-    {
-      icon: Sparkles,
-      title: 'Simplicity First',
-      description: 'Strip away the unnecessary. Every element must earn its place through purpose and clarity.',
-    },
-    {
-      icon: Layers,
-      title: 'Hierarchy & Balance',
-      description: 'Visual weight guides the eye. Structure creates understanding before content does.',
-    },
-    {
-      icon: Zap,
-      title: 'Intentional Motion',
-      description: 'Animation reveals relationships. Movement should feel natural, never arbitrary.',
-    },
-  ];
-
-  return (
-    <section
-      id="philosophy"
-      className="py-16 sm:py-[60px] scroll-mt-[40px]"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
-        <div className="mb-12 sm:mb-16 text-left">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Design Philosophy</h2>
-          <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
-            My approach to design is rooted in clarity, intention, and empathy.
-            These principles guide every decision, from the first sketch to the final pixel.
-          </p>
-          <p className="mt-6 text-muted italic text-sm sm:text-base max-w-2xl">
-            "Good design is as little design as possible."
-            <span className="block mt-2 text-muted not-italic text-xs">— Dieter Rams</span>
-          </p>
-        </div>
-
-        <div className="relative">
-
-          <div
-            ref={scrollerRef}
-            className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 -mx-4 px-4 sm:gap-6 snap-x snap-mandatory scroll-px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6 lg:overflow-visible lg:pb-0 no-scrollbar"
-          >
-            {principles.map((principle, index) => {
-              const Icon = principle.icon;
-              const isActive = index === activeIndex;
-              return (
-                <motion.div
-                  key={principle.title}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="group relative flex-shrink-0 w-[280px] sm:w-[320px] sm:w-auto h-full snap-center snap-always"
-                  data-scroll-item
-                  data-index={index}
-                >
-                  <div
-                    className={`relative h-full p-5 rounded-2xl card-surface transition-all duration-300 ${isActive ? 'border-primary' : 'lg:group-hover:border-primary/25 lg:group-hover:shadow-lg'}`}
-                  >
-                    <div
-                      className={`w-10 h-10 mb-6 flex items-center justify-center rounded-lg card-surface transition-colors duration-300 transition-transform ${isActive ? 'rotate-6' : 'group-hover:rotate-6'}`}
-                    >
-                      <Icon className="w-5 h-5 text-primary" strokeWidth={2} />
-                    </div>
-
-                    <h3 className={`text-lg font-semibold mb-3 transition-colors duration-300 ${isActive ? 'text-primary' : 'text-theme-primary group-hover:text-primary'}`}>
-                      {principle.title}
-                    </h3>
-                    <p className="text-muted leading-relaxed text-sm sm:text-base mb-5 line-clamp-2">
-                      {principle.description}
-                    </p>
-
-                    <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden rounded-tr-2xl pointer-events-none">
-                      <div className="absolute top-0 right-0 w-px h-8 bg-gradient-to-b from-white/20 to-transparent" />
-                      <div className="absolute top-0 right-0 w-8 h-px bg-gradient-to-l from-white/20 to-transparent" />
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-
-      </motion.div>
-    </section>
-  );
-};
-
-export default DesignPhilosophy;
+  return <section ref={section} id="philosophy" className="editorial-section philosophy-section">
+    <SectionIntro title="Design principles." />
+    <div className="principle-grid">{principles.map(({ label, title, text, icon: Icon }, index) => <article className="principle-card" key={label}>
+      <div className="principle-card-top"><span className="surface-icon"><Icon size={21} strokeWidth={1.6} /></span><span>{label}</span></div>
+      {index === 2 ? <div className="principle-illustration"><div className="feedback-ui"><FeedbackButton className="feedback-ui-button" previewOnHover /></div></div> : <button type="button" className="principle-illustration" aria-label={`Replay ${label.toLowerCase()} demonstration`}>
+        {index === 0 && <div className="clarity-ui"><span className="clarity-ui-secondary" /><span className="clarity-ui-main"><span /><span /><span /></span><span className="clarity-ui-secondary" /></div>}
+        {index === 1 && <div className="hierarchy-ui"><span className="hierarchy-ui-eyebrow" /><span className="hierarchy-ui-title" /><span className="hierarchy-ui-body" /><span className="hierarchy-ui-body short" /><span className="hierarchy-ui-action" /></div>}
+      </button>}
+      <h3>{title}</h3><p>{text}</p>
+    </article>)}</div>
+  </section>;
+}

@@ -1,612 +1,76 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, ChevronDown } from 'lucide-react';
-import scribblyThumb from '../assets/scribbly-thumb.png';
-import scribbly1 from '../assets/scribbly-1.png';
-import scribbly2 from '../assets/scribbly-2.png';
-import scribbly3 from '../assets/scribbly-3.png';
-import cinepickThumb from '../assets/cinepick-thumb.png';
-import cinepick1 from '../assets/cinepick-1.png';
-import cinepick2 from '../assets/cinepick-2.png';
-import cinepick3 from '../assets/cinepick-3.png';
-import labThumb from '../assets/lab-thumb.png';
+import { ArrowUpRight, ArrowLeft, ArrowRight, X, Maximize2, Minimize2 } from './AnimatedIcons';
+import { projects } from '../data/projects';
+import { reveal, SectionIntro } from './SectionIntro';
+import { ScrollTrigger } from '../lib/scrollMotion';
+import { useMotionPreference } from '../hooks/useMotionPreference';
+import ProjectPreview from './ProjectPreview';
 
-import lab2 from '../assets/lab-2.png';
-import lab3 from '../assets/lab-3.png';
+type Project = typeof projects[number];
+const filters = ['All work', 'Websites', 'Apps', 'Interactions'] as const;
+const orderedProjects = [...projects].sort((a, b) => (a.id === 6 ? -2 : a.id === -1 ? -1 : 0) - (b.id === 6 ? -2 : b.id === -1 ? -1 : 0));
 
-import labNew1 from '../assets/lab-new-1.png';
-import hootlinkThumb from '../assets/hootlink-thumb.png';
-import hootlink1 from '../assets/hootlink-1.png';
-import hootlink2 from '../assets/hootlink-2.png';
-import hootlink3 from '../assets/hootlink-3.png';
-import intecNewThumb from '../assets/intec-new-thumb.png';
-import intecNew1 from '../assets/intec-new-1.png';
-import intecNew2 from '../assets/intec-new-2.png';
-
-import gridlineThumb from '../assets/gridline-thumb.png';
-import gridline1 from '../assets/gridline-1.png';
-import gridline2 from '../assets/gridline-2.png';
-import gridline3 from '../assets/gridline-3.png';
-
-const Projects = () => {
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
-  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const mobileScrollRef = useRef<HTMLDivElement | null>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const scrollbarRef = useRef<HTMLDivElement>(null);
-  const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null);
-
-  const projects = [
-    {
-      id: 0,
-      name: 'InTec System',
-      description: 'A full redesign of intecsystem.com — modernising an existing IT solutions provider into a conversion-focused platform for enterprise decision-makers.',
-      longDescription:
-        'InTec System is a live redesign of the existing intecsystem.com website. The goal was to modernise a dated IT services presence into a credible, conversion-focused platform. The redesign clarifies the user journey for complex offerings — virtualization, system integration, and managed infrastructure — through a clean card-based layout, confident typography, and a trusted-partner showcase featuring Cisco, Oracle, AWS, and HP. The responsive result turns a technical offering into an approachable, authoritative digital presence.',
-      image: intecNewThumb,
-      detailImages: [intecNew1, intecNew2],
-      category: 'Website Redesign',
-      url: 'https://intecsystems.gridlinelabs.com',
-      thumbPadded: true,
-    },
-    {
-      id: -1,
-      name: 'Gridline Labs',
-      description: 'The studio website for Gridline Labs — a design-led digital agency focused on building purposeful digital products.',
-      longDescription:
-        'Gridline Labs is the agency behind the design work in this portfolio. The website needed to communicate a clear design-led identity while remaining functional as a business platform — showcasing services, work, and values without unnecessary noise. The design uses confident typography, restrained color, and deliberate whitespace to let the work speak. Every section is built to establish trust quickly and move visitors toward a conversation.',
-      image: gridlineThumb,
-      detailImages: [gridline1, gridline2, gridline3],
-      category: 'Website Design',
-      url: 'https://gridlinelabs.com',
-      thumbPadded: true,
-    },
-    {
-      id: 2,
-      name: 'Scribbly',
-      description: 'An AI-powered note-taking app designed for quick capture — blending typed notes and freehand scribbles in one minimal space.',
-      longDescription:
-        'Scribbly is an AI-powered note and scribble-taking app built for the way people actually think — messy, fast, and non-linear. The interface keeps friction low so capturing an idea feels instant, whether it\'s typed text or a quick handwritten scrawl. AI assists in organizing and surfacing notes without getting in the way. The design prioritizes a calm, minimal aesthetic that lets the content breathe, making it easy to focus on thinking rather than managing a tool.',
-      image: scribblyThumb,
-      detailImages: [scribbly1, scribbly2, scribbly3],
-      category: 'App Design'
-    },
-    {
-      id: 3,
-      name: 'Cinepick',
-      description: 'A smart movie generator app that helps users find their next favorite watch through mood-based filtering and personalized discovery.',
-      longDescription:
-        'Cinepick is a mobile application designed to solve the "what should I watch" paralysis. Instead of endless scrolling, users can generate tailored movie recommendations based on their current mood, preferred genre, and specific filters like year or rating. The interface features a sleek dark mode aesthetic with vibrant accent colors, focusing on high-quality imagery and intuitive controls. It turns the passive act of searching into an engaging, interactive discovery process.',
-      image: cinepickThumb,
-      detailImages: [cinepick1, cinepick2, cinepick3],
-      category: 'App Design'
-    },
-    {
-      id: 4,
-      name: 'Laboratorium',
-      description: 'A visual identity for a cultural education center in Macedonia, blending industrial grit with retro-educational aesthetics.',
-      longDescription:
-        'Laboratorium is a cultural education center in Macedonia that bridges the gap between formal and informal learning. The visual identity reflects this mission by combining raw, industrial textures with a retro-educational aesthetic. Using collage-style imagery, bold typography, and a distinct red-and-black color palette, the design captures the spirit of experimentation and hands-on creativity. It’s a space where ideas are tested, and arts and crafts meet practical skills.',
-      image: labThumb,
-      detailImages: [labNew1, lab2, lab3],
-      category: 'Website Design'
-    },
-    {
-      id: 5,
-      name: 'Hootlink',
-      description: 'A friendly login flow design featuring a playful owl mascot that reacts to user interaction.',
-      longDescription:
-        'Hootlink is an exploration into emotional design for utility screens. The goal was to transform a standard login process into a moment of delight. The owl mascot serves as a friendly guide, reacting in real-time—peeking when you type your email and covering its eyes when you enter your password. This conceptual flow demonstrates how micro-interactions and character design can build brand affection even in the most functional parts of an application.',
-      image: hootlinkThumb,
-      detailImages: [hootlink1, hootlink2, hootlink3],
-      category: 'Login Screen'
-    },
-  ];
-
-  const selectedProject = projects.find(project => project.id === selectedProjectId) || null;
-
-
-
-  // Lock background scroll when a project modal is open
+function ProjectDialog({ project, onClose }: { project: Project; onClose: () => void }) {
+  const [slide, setSlide] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useMotionPreference();
+  const go = (direction: number) => setSlide(value => Math.max(0, Math.min(project.detailImages.length - 1, value + direction)));
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    if (selectedProjectId !== null) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-
-      // Reset description open state when opening a new project
-      setIsDescriptionOpen(false);
-
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [selectedProjectId]);
-
-  // Sync scrollbar with container
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-
-    const handleScroll = () => {
-      // Sync scrollbar progress
-      if (!isDragging) {
-        const p = el.scrollLeft / (el.scrollWidth - el.clientWidth);
-        setScrollProgress(Math.min(1, Math.max(0, p)));
-      }
-
-      // Calculate active centered item (Mobile Only)
-      if (window.innerWidth >= 1024) {
-        setActiveProjectIndex(null);
-        return;
-      }
-
-      const containerRect = el.getBoundingClientRect();
-      const containerCenter = containerRect.left + containerRect.width / 2;
-
-      let closestIndex: number | null = null;
-      let minDiff = Infinity;
-
-      el.querySelectorAll('[data-project-card]').forEach((item, index) => {
-        const itemRect = item.getBoundingClientRect();
-        const itemCenter = itemRect.left + itemRect.width / 2;
-        const diff = Math.abs(containerCenter - itemCenter);
-
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIndex = index;
-        }
-      });
-
-      setActiveProjectIndex(closestIndex);
+    const oldFocus = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    const root = document.getElementById('root');
+    const hadInert = root?.hasAttribute('inert');
+    document.body.style.overflow = 'hidden';
+    root?.setAttribute('inert', '');
+    ref.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key === 'ArrowRight') { event.preventDefault(); setSlide(value => Math.min(value + 1, project.detailImages.length - 1)); }
+      if (event.key === 'ArrowLeft') { event.preventDefault(); setSlide(value => Math.max(value - 1, 0)); }
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href]') || []).filter(item => item.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || document.activeElement === ref.current)) { event.preventDefault(); first?.focus(); }
     };
-
-    el.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-    // Initialize on mount
-    handleScroll();
-
+    document.addEventListener('keydown', onKey);
     return () => {
-      el.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      document.body.style.overflow = overflow;
+      if (!hadInert) root?.removeAttribute('inert');
+      document.removeEventListener('keydown', onKey);
+      oldFocus?.focus({ preventScroll: true });
     };
-  }, [isDragging]);
+  }, [onClose, project]);
 
-
-  // Mouse wheel → horizontal scroll
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-
-    const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      const { scrollLeft, scrollWidth, clientWidth } = el;
-      const atStart = scrollLeft <= 0;
-      const atEnd = scrollLeft >= scrollWidth - clientWidth - 1;
-      if ((e.deltaY < 0 && atStart) || (e.deltaY > 0 && atEnd)) return;
-      e.preventDefault();
-      el.scrollLeft += e.deltaY * 0.5;
-    };
-
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, []);
-
-  const scrollByCard = (dir: 'left' | 'right') => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir === 'right' ? 240 : -240, behavior: 'smooth' });
-  };
-
-  const canScrollLeft = scrollProgress > 0.02;
-  const canScrollRight = scrollProgress < 0.98;
-
-  // Handle dragging the scrollbar
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const bar = scrollbarRef.current;
-      const content = scrollerRef.current;
-      if (!bar || !content) return;
-
-      const rect = bar.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-      setScrollProgress(p);
-      content.scrollLeft = p * (content.scrollWidth - content.clientWidth);
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.body.style.userSelect = '';
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    document.body.style.userSelect = 'none';
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.userSelect = '';
-    };
-  }, [isDragging]);
-
-  const handleScrollBarMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    // Immediate jump on click
-    const bar = scrollbarRef.current;
-    const content = scrollerRef.current;
-    if (bar && content) {
-      const rect = bar.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-      setScrollProgress(p);
-      content.scrollLeft = p * (content.scrollWidth - content.clientWidth);
-    }
-  };
-
-  // Auto-scroll when description opens/closes on mobile
-  useEffect(() => {
-    if (!mobileScrollRef.current) return;
-
-    if (isDescriptionOpen) {
-      // Scroll to bottom to show text
-      setTimeout(() => {
-        mobileScrollRef.current?.scrollTo({
-          top: mobileScrollRef.current.scrollHeight,
-          behavior: 'smooth'
-        });
-      }, 100);
-    } else {
-      // Scroll back to top to show images
-      mobileScrollRef.current.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  }, [isDescriptionOpen]);
-
-  return (
-    <>
-      <section
-        id="projects"
-        className="pt-12 pb-16 sm:py-[60px] scroll-mt-[40px]"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.15 }}
-          transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-        >
-          <div className="mb-6 sm:mb-10 flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6">Work</h2>
-              <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
-                Explore my projects: a testament to the art of minimal design
-                meeting functionality.
-              </p>
-            </div>
-            {/* Desktop arrow nav */}
-            <div className="hidden lg:flex items-center gap-2 flex-shrink-0 pb-1">
-              <AnimatePresence>
-                {canScrollLeft && (
-                  <motion.button
-                    key="left"
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.18 }}
-                    type="button"
-                    onClick={() => scrollByCard('left')}
-                    className="w-9 h-9 rounded-full chip-surface flex items-center justify-center hover:border-primary/40 hover:text-primary transition-colors duration-200"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </motion.button>
-                )}
-              </AnimatePresence>
-              <motion.button
-                type="button"
-                onClick={() => scrollByCard('right')}
-                animate={{ opacity: canScrollRight ? 1 : 0.3 }}
-                transition={{ duration: 0.18 }}
-                className="w-9 h-9 rounded-full chip-surface flex items-center justify-center hover:border-primary/40 hover:text-primary transition-colors duration-200"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </motion.button>
-            </div>
-          </div>
-
-          <div className="pt-2">
-
-            {/* Mobile scroll dots */}
-            <div className="flex lg:hidden justify-start gap-1.5 mb-4">
-              {projects.map((_, index) => (
-                <motion.div
-                  key={index}
-                  animate={{
-                    width: activeProjectIndex === index ? 20 : 6,
-                    opacity: activeProjectIndex === index ? 1 : 0.3,
-                  }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                  className="h-1.5 rounded-full bg-primary"
-                />
-              ))}
-            </div>
-
-            <div className="relative">
-
-              <div
-                ref={scrollerRef}
-                className="overflow-x-auto overflow-y-visible pt-3 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 snap-x snap-mandatory lg:snap-none no-scrollbar"
-                style={{ touchAction: 'pan-x' }}
-              >
-                <motion.div
-                  className="flex flex-nowrap gap-4 sm:gap-5 lg:gap-6 pb-2"
-                >
-                  {projects.map((project, index) => {
-                    const isActive = activeProjectIndex === index;
-                    return (
-                      <motion.button
-                        key={project.id}
-                        type="button"
-                        className="group text-left flex-shrink-0 w-[240px] sm:w-[280px] md:w-[300px] lg:w-[320px] snap-center snap-always"
-                        data-project-card
-                        onClick={() => setSelectedProjectId(project.id)}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.3 + index * 0.07, ease: 'easeOut' }}
-                      >
-                        <div className={`group rounded-2xl card-surface transition-all duration-300 overflow-hidden ${isActive ? 'border-primary ring-1 ring-primary' : 'card-surface-hover lg:hover:border-primary/50'}`}>
-                          <div className="relative h-40 sm:h-44 md:h-48 flex items-center justify-center">
-                            <div className="absolute inset-0 bg-white dark:bg-[#0b0b0b]" />
-
-                            {/* Project Image or Fallback Pattern */}
-                            {(project as any).image ? (
-                              <div className={`absolute inset-0 ${(project as any).thumbPadded ? 'p-3 sm:p-4' : ''}`}>
-                                <div className={`w-full h-full relative overflow-hidden flex items-center justify-center ${(project as any).thumbPadded ? 'rounded-xl' : ''}`}>
-                                  <img
-                                    src={(project as any).image}
-                                    alt={project.name}
-                                    className="w-[100%] h-[100%] object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-                                  />
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="absolute inset-0 opacity-15 pointer-events-none">
-                                  <svg className="w-full h-full" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                      <pattern id={`grid-${project.id}`} width="24" height="24" patternUnits="userSpaceOnUse">
-                                        <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-theme-primary/40" />
-                                      </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill={`url(#grid-${project.id})`} />
-                                  </svg>
-                                </div>
-
-                                <div className="relative z-10">
-                                  <div className="w-14 h-14 rounded-xl bg-white/90 dark:bg-black/40 border border-black/10 dark:border-white/10 flex items-center justify-center transition-colors duration-300">
-                                    <div className="w-6 h-6 rounded bg-primary/20 group-hover:bg-primary/30 transition-colors duration-300" />
-                                  </div>
-                                </div>
-                              </>
-                            )}
-
-                            <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden rounded-tr-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="absolute top-0 right-0 w-px h-6 bg-gradient-to-b from-primary/30 to-transparent" />
-                              <div className="absolute top-0 right-0 w-6 h-px bg-gradient-to-l from-primary/30 to-transparent" />
-                            </div>
-                          </div>
-
-                          <div className="p-5">
-                            <div className="flex flex-col gap-2 mb-1">
-                              <div className="w-fit px-2 py-1 rounded-full bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/5 backdrop-blur-sm">
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted block">
-                                  {project.category}
-                                </span>
-                              </div>
-                              <div className="flex items-start justify-between gap-3">
-                                <h3 className={`text-lg font-bold transition-colors duration-300 ${isActive ? 'text-primary' : 'text-theme-primary group-hover:text-primary'}`}>
-                                  {project.name}
-                                </h3>
-                              </div>
-                            </div>
-                            <p className="mt-2 text-sm text-muted leading-relaxed line-clamp-3">
-                              {project.description}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                  <div className="flex-shrink-0 w-4 sm:w-6 lg:w-8 -ml-4 sm:-ml-5 lg:-ml-6" />
-                </motion.div>
-              </div>
-
-              {/* Desktop Scrollbar (Bottom) */}
-              <div className="hidden lg:flex flex-col w-full mt-6 px-1">
-                <div
-                  ref={scrollbarRef}
-                  className="w-full h-[3px] bg-black/8 dark:bg-white/10 rounded-full cursor-pointer relative group overflow-hidden"
-                  onMouseDown={handleScrollBarMouseDown}
-                >
-                  <motion.div
-                    className="absolute top-0 h-full bg-primary rounded-full"
-                    style={{ width: '25%' }}
-                    animate={{ left: `${scrollProgress * 75}%` }}
-                    transition={{ type: 'tween', duration: 0.15, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </motion.div>
-      </section>
-
-      {selectedProject && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 sm:px-6 lg:px-8">
-          <div
-            className="absolute inset-0 bg-black/70"
-            onClick={() => setSelectedProjectId(null)}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="relative w-full max-w-5xl h-auto max-h-[85vh] lg:h-[85vh] panel-surface rounded-3xl overflow-hidden shadow-2xl z-[61] flex flex-col"
-          >
-            {/* Mobile Header (Visible only on small screens) */}
-            {/* Mobile Header (Visible only on small screens) */}
-            <div className="lg:hidden flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10 bg-white dark:bg-[#0b0b0b] z-20 sticky top-0">
-              <h3 className="text-lg font-semibold">{selectedProject.name}</h3>
-              <button
-                type="button"
-                onClick={() => setSelectedProjectId(null)}
-                className="w-8 h-8 rounded-full chip-surface flex items-center justify-center"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Scrollable Content Wrapper */}
-            <div
-              ref={mobileScrollRef}
-              className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row min-h-0"
-            >
-
-              {/* Left Panel: Scrollable Images */}
-              <div className="w-full lg:flex-1 relative lg:overflow-hidden flex flex-col bg-black/5 dark:bg-black/20">
-
-                {/* Mobile Swipe Indicator (Static at top) */}
-                <div className="lg:hidden w-full flex items-center justify-between px-4 py-2 z-10 mt-2 pointer-events-none">
-                  <ChevronLeft className="w-4 h-4 text-muted" />
-                  <span className="uppercase tracking-widest text-xs font-medium text-muted">Swipe to view</span>
-                  <ChevronRight className="w-4 h-4 text-muted" />
-                </div>
-
-                <div
-                  className="w-full flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto no-scrollbar relative snap-x snap-mandatory"
-                  ref={(node) => {
-                    if (node) {
-                      // Reset horizontal scroll to start whenever this mounts/updates
-                      node.scrollLeft = 0;
-                    }
-                  }}
-                >
-                  <div className="flex flex-row lg:flex-col p-4 sm:p-6 lg:p-8 gap-2 lg:gap-6 items-start lg:items-center">
-                    {[0, 1, 2].map((slot) => {
-                      const hasImage = (selectedProject as any).detailImages && (selectedProject as any).detailImages[slot];
-                      if (!hasImage) return null;
-                      return (
-                        <div key={slot} className="flex-shrink-0 w-[85vw] lg:w-full snap-center rounded-2xl overflow-hidden shadow-sm border border-black/5 dark:border-white/5 bg-white dark:bg-[#0b0b0b] mx-auto">
-                          <div className="w-full relative flex items-center justify-center bg-gray-50/50 dark:bg-zinc-900/30 p-1">
-                            <img
-                              src={(selectedProject as any).detailImages[slot]}
-                              alt={`${selectedProject.name} detail ${slot + 1}`}
-                              className="w-full max-h-[50vh] sm:max-h-[500px] object-contain block mx-auto rounded-lg"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {/* Spacer for horizontal scroll padding */}
-                    <div className="w-4 sm:w-6 h-1 flex-shrink-0 lg:hidden" />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Right Panel: Content (Scrollable with parent on mobile) - Hidden on mobile now as it is in dropdown */}
-              <div className="hidden lg:flex w-full lg:w-[420px] xl:w-[480px] bg-inherit lg:border-l border-black/10 dark:border-white/10 flex-col h-auto lg:h-full overflow-visible">
-                <div className="p-6 sm:p-8 lg:p-10 h-full flex flex-col">
-
-                  {/* Desktop Header */}
-                  <div className="hidden lg:flex items-start justify-between mb-8">
-                    <div>
-                      <h2 className="text-3xl font-bold mb-2">{selectedProject.name}</h2>
-                      <p className="text-muted text-lg">{selectedProject.category}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedProjectId(null)}
-                      className="w-10 h-10 rounded-full chip-surface flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1">
-                    <div className="prose dark:prose-invert prose-lg leading-relaxed text-muted">
-                      <p>{selectedProject.longDescription ?? selectedProject.description}</p>
-                    </div>
-                  </div>
-
-                  {(selectedProject as any).url && (
-                    <a
-                      href={(selectedProject as any).url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-                    >
-                      Visit Site
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Buttons (outside scroll — always visible at bottom) */}
-            <div className="lg:hidden w-full flex flex-col gap-3 px-4 pb-4 pt-3 border-t border-black/10 dark:border-white/10 bg-white dark:bg-[#0b0b0b] z-20">
-              {(selectedProject as any).url && (
-                <a
-                  href={(selectedProject as any).url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-primary text-white text-xs font-semibold uppercase tracking-widest"
-                >
-                  Visit Site
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-                </a>
-              )}
-              <button
-                type="button"
-                onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
-                className="w-full bg-white dark:bg-[#1a1a1a] py-3 rounded-full flex items-center justify-center gap-2 text-xs font-medium border border-black/5 dark:border-white/10 shadow-sm transition-colors active:scale-[0.98]"
-              >
-                <span className="uppercase tracking-widest text-muted">{isDescriptionOpen ? 'Read less' : 'Read more'}</span>
-                <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-300 ${isDescriptionOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {isDescriptionOpen && (
-                  <motion.div
-                    initial={{ height: -5, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    className="overflow-hidden bg-white dark:bg-[#1a1a1a] rounded-2xl border border-black/5 dark:border-white/10 shadow-sm"
-                  >
-                    <div className="p-4">
-                      <p className="text-muted leading-relaxed text-sm">
-                        {selectedProject.longDescription ?? selectedProject.description}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div >
-        </div >,
-        document.body
-      )}
-    </>
-  );
+  return <motion.div data-lenis-prevent className="project-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
+    <motion.div ref={ref} role="dialog" aria-modal="true" aria-labelledby="project-title" tabIndex={-1} className={`project-dialog ${expanded ? 'gallery-expanded' : ''}`} initial={reduced ? { opacity: 0 } : { y: 48, scale: .96, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={reduced ? { opacity: 0 } : { y: 24, scale: .98, opacity: 0 }} transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 220, damping: 28 }} onClick={event => event.stopPropagation()}>
+      <div className="dialog-top"><button className="dialog-close" onClick={onClose} aria-label="Close project">Close <X size={20} /></button></div>
+      <div className="dialog-body"><div className="dialog-gallery"><div className="gallery-stage">
+        <AnimatePresence mode="wait" initial={false}><motion.img key={slide} src={project.detailImages[slide]} alt={`${project.name} design, image ${slide + 1}`} initial={{ opacity: 0, x: reduced ? 0 : 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: reduced ? 0 : -24 }} transition={{ duration: reduced ? 0 : .25 }} drag={reduced ? false : 'x'} dragConstraints={{ left: 0, right: 0 }} dragElastic={.15} onDragEnd={(_, info) => { if (info.offset.x < -50) go(1); if (info.offset.x > 50) go(-1); }} /></AnimatePresence>
+        <button className="gallery-expand icon-button" onClick={() => setExpanded(!expanded)} aria-label={expanded ? 'Reduce image' : 'Expand image'} aria-pressed={expanded}>{expanded ? <Minimize2 size={19} /> : <Maximize2 size={19} />}</button>
+      </div><div className="gallery-controls"><button className="icon-button" disabled={slide === 0} onClick={() => go(-1)} aria-label="Previous image"><ArrowLeft size={20} /></button><div className="gallery-thumbnails" role="group" aria-label="Project images">{project.detailImages.map((src, i) => <button key={src} onClick={() => setSlide(i)} aria-label={`Show image ${i + 1}`} aria-pressed={slide === i} className={slide === i ? 'selected' : ''}><img src={src} alt="" /></button>)}</div><button className="icon-button" disabled={slide === project.detailImages.length - 1} onClick={() => go(1)} aria-label="Next image"><ArrowRight size={20} /></button></div><span className="sr-only" role="status">Image {slide + 1} of {project.detailImages.length}</span></div>
+      <div className="dialog-copy"><h2 id="project-title">{project.name}</h2><p className="project-category">{project.category}</p><p className="dialog-description">{project.longDescription}</p>{project.url && <a className="hero-cta" href={project.url} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={18} /></a>}</div></div>
+    </motion.div>
+  </motion.div>;
 }
 
-export default Projects;
+export default function Projects({ selectedId, onSelect }: { selectedId: number | null; onSelect: (id: number | null) => void }) {
+  const [filter, setFilter] = useState<typeof filters[number]>('All work');
+  const selected = projects.find(project => project.id === selectedId) || null;
+  const reduced = useMotionPreference();
+  const visible = orderedProjects.filter(project => filter === 'All work' || (filter === 'Websites' && project.category.includes('Website')) || (filter === 'Apps' && project.category === 'App Design') || (filter === 'Interactions' && project.category === 'Login Screen'));
+  const closeRef = useRef(() => onSelect(null));
+  return <section id="projects" className="editorial-section">
+    <SectionIntro title="Projects." />
+    <div className="work-toolbar"><div className="filter-list" role="group" aria-label="Filter projects">{filters.map(item => <button key={item} onClick={() => setFilter(item)} aria-pressed={filter === item} className={`filter-button ${filter === item ? 'active' : ''}`}>{filter === item && <motion.span className="filter-active" layoutId="work-filter" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}<span>{item}</span></button>)}</div><span className="work-count" aria-live="polite">{visible.length} {visible.length === 1 ? 'project' : 'projects'}</span></div>
+    <motion.div layout={!reduced} onLayoutAnimationComplete={() => ScrollTrigger.refresh()} className="work-grid"><AnimatePresence mode="popLayout" initial={false}>{visible.map(project => <motion.article layout={!reduced} className={project.id === 6 ? 'work-featured' : undefined} key={project.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .35 }}>
+      <motion.button {...reveal} type="button" onClick={() => onSelect(project.id)} className="work-card group" aria-label={`Explore ${project.name}`} whileHover={reduced ? {} : { y: -6 }} whileTap={reduced ? {} : { scale: .985 }}>
+        <div className="work-art"><ProjectPreview image={project.image} detailImages={project.detailImages} name={project.name} /></div><div className="work-card-copy"><div className="work-info"><div><span>{project.category}</span><h3>{project.name}</h3></div><span className="work-card-arrow"><ArrowUpRight size={24} /></span></div><p className="work-description">{project.description}</p></div>
+      </motion.button>
+    </motion.article>)}</AnimatePresence></motion.div>
+    {createPortal(<AnimatePresence>{selected && <ProjectDialog key={selected.id} project={selected} onClose={closeRef.current} />}</AnimatePresence>, document.body)}
+  </section>;
+}

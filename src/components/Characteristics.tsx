@@ -1,135 +1,28 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
+import { ArrowUpRight, Layers, LayoutTemplate } from './AnimatedIcons';
+import portrait from '../assets/memoji.png';
+import { SectionIntro } from './SectionIntro';
+import { gsap, useGSAP } from '../lib/scrollMotion';
+import { useSectionMotion } from '../hooks/useSectionMotion';
 
-const Characteristics = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const scrollerRef = useRef<HTMLDivElement>(null);
+export default function Characteristics() {
+  const section = useRef<HTMLElement>(null);
+  useSectionMotion(section, '.profile-card, .about-detail');
+  useGSAP(() => {
+    const media = gsap.matchMedia();
+    media.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
+      gsap.fromTo('.profile-portrait img', { y: 18 }, { y: -18, ease: 'none', scrollTrigger: { trigger: section.current, start: 'top bottom', end: 'bottom top', scrub: 1 } });
+    });
+    return () => media.revert();
+  }, { scope: section });
 
-  useEffect(() => {
-    const container = scrollerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      if (window.innerWidth >= 1024) {
-        setActiveIndex(null);
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const containerCenter = containerRect.left + containerRect.width / 2;
-
-      let closestIndex: number | null = null;
-      let minDiff = Infinity;
-
-      container.querySelectorAll('[data-scroll-item]').forEach((item) => {
-        const itemRect = item.getBoundingClientRect();
-        const itemCenter = itemRect.left + itemRect.width / 2;
-        const diff = Math.abs(containerCenter - itemCenter);
-
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIndex = Number(item.getAttribute('data-index'));
-        }
-      });
-
-      if (closestIndex !== null) {
-        setActiveIndex(closestIndex);
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
-    handleScroll();
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, []);
-  const marqueeWords = [
-    'PROBLEM SOLVER',
-    'TEAMPLAYER',
-    'FRIENDLY',
-    'QUICK LEARNER',
-    'CREATIVE',
-    'DETAIL ORIENTED',
-    'PRECISE',
-    'INTUITIVE',
-  ];
-
-  return (
-    <section
-      id="characteristics"
-      className="pt-12 pb-16 sm:py-[60px] scroll-mt-[40px]"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
-        <div className="mb-12 sm:mb-16 text-left">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Characteristics</h2>
-        </div>
-
-        <div className="relative w-full h-auto">
-          <div className="rounded-2xl card-surface overflow-hidden">
-            <div className="relative px-6 sm:px-8 py-4">
-              <motion.div
-                className="flex whitespace-nowrap"
-                animate={{ x: ['0%', '-50%'] }}
-                transition={{ duration: 22, ease: 'linear', repeat: Infinity }}
-              >
-                {[0, 1].map((dup) => (
-                  <div key={dup} className="flex items-center gap-6 pr-6">
-                    {marqueeWords.map((word) => (
-                      <span
-                        key={`${dup}-${word}`}
-                        className="text-primary uppercase tracking-[0.18em] text-sm sm:text-base font-semibold"
-                      >
-                        {word}
-                      </span>
-                    ))}
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="relative">
-
-            <div ref={scrollerRef} className="mt-6 sm:mt-8 flex gap-4 overflow-x-auto overflow-y-hidden pb-4 -mx-4 px-4 items-stretch snap-x snap-mandatory scroll-px-6 lg:grid lg:grid-cols-3 lg:gap-6 lg:mx-0 lg:px-0 lg:overflow-visible lg:pb-0 no-scrollbar">
-              <div data-scroll-item data-index="0" className={`rounded-2xl p-5 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 0 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
-                <div className="text-xs font-semibold tracking-wide text-muted uppercase mb-4">How I work</div>
-                <div className="text-lg font-semibold text-theme-primary mb-2">Calm, structured execution</div>
-                <div className="text-sm text-muted leading-relaxed">
-                  Simple, consistent, and intentional.
-                </div>
-              </div>
-
-              <div data-scroll-item data-index="1" className={`rounded-2xl p-5 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 1 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
-                <div className="text-xs font-semibold tracking-wide text-muted uppercase mb-4">Core Values</div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1.5 rounded-full chip-surface text-sm font-medium text-theme-primary">Clarity</span>
-                  <span className="px-3 py-1.5 rounded-full chip-surface text-sm font-medium text-theme-primary">Consistency</span>
-                  <span className="px-3 py-1.5 rounded-full chip-surface text-sm font-medium text-theme-primary">Empathy</span>
-                  <span className="px-3 py-1.5 rounded-full chip-surface text-sm font-medium text-theme-primary">Detail</span>
-                </div>
-              </div>
-
-              <div data-scroll-item data-index="2" className={`rounded-2xl p-5 h-auto flex-shrink-0 w-[280px] sm:w-[320px] lg:w-auto snap-center snap-always flex flex-col card-surface transition-all duration-300 ${activeIndex === 2 ? 'border-primary' : 'lg:hover:border-primary/25 lg:hover:shadow-lg'}`}>
-                <div className="text-xs font-semibold tracking-wide text-muted uppercase mb-4">What you get</div>
-                <div className="text-lg font-semibold text-theme-primary mb-2">Reliable partner</div>
-                <div className="text-sm text-muted leading-relaxed">
-                  Problem solving, easy collaboration, and rapid learning.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </section>
-  );
-};
-
-export default Characteristics;
+  return <section ref={section} id="characteristics" className="editorial-section about-section">
+    <SectionIntro title="About me." />
+    <div className="about-layout"><div className="profile-card"><div className="profile-portrait"><img src={portrait} alt="An illustrated portrait of Hristijan" loading="lazy" /></div><div className="profile-caption"><h3>Hristijan Bristić</h3><p>UI/UX designer · Skopje, Macedonia</p></div></div>
+      <div className="about-copy"><div className="about-detail"><p className="about-lead">A partner in figuring things out.</p><p>I work with people who have an idea and need a thoughtful way to bring it to life. I connect structure, visual design, and interaction to make websites and products easier to use.</p><p>I value honest feedback, calm collaboration, and the small decisions that make the whole experience feel right.</p></div>
+        <div className="about-services"><div className="about-service about-detail"><span className="surface-icon"><Layers size={21} strokeWidth={1.6} /></span><div><h3>Digital products</h3><p>User flows, interfaces, and design systems.</p></div></div><div className="about-service about-detail"><span className="surface-icon"><LayoutTemplate size={21} strokeWidth={1.6} /></span><div><h3>Websites & identity</h3><p>A clear presence, from the first impression on.</p></div></div></div>
+        <div className="about-detail about-cta"><a href="#contact" className="hero-secondary">Let’s work together <ArrowUpRight size={17} /></a></div>
+      </div>
+    </div>
+  </section>;
+}

@@ -1,165 +1,36 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Palette, Type, Layers, Maximize, Monitor, Aperture } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Type, Palette, MousePointer2 } from './AnimatedIcons';
+import FeedbackButton from './FeedbackButton';
+import { SectionIntro } from './SectionIntro';
+import { useSectionMotion } from '../hooks/useSectionMotion';
+import { useMotionPreference } from '../hooks/useMotionPreference';
 
-const Aesthetics = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
+const studies = [
+  { title: 'Typography', icon: Type, label: 'Find a comfortable rhythm.' },
+  { title: 'Contrast', icon: Palette, label: 'Keep the message readable.' },
+  { title: 'Feedback', icon: MousePointer2, label: 'An action deserves a response.' },
+];
+const palette = [{ name: 'White', color: '#ffffff', text: '#000000' }, { name: 'Red', color: '#d60000', text: '#ffffff' }, { name: 'Black', color: '#000000', text: '#ffffff' }];
 
-  const aestheticItems = [
-    {
-      id: 1,
-      icon: Layers,
-      title: 'Modular Systems',
-      description: 'Scalable consistency. Building interfaces with atomic components that fit together perfectly.',
-    },
-    {
-      id: 2,
-      icon: Type,
-      title: 'Swiss Typography',
-      description: 'The power of the grid. Using type not just for reading, but as the primary structural element of design.',
-    },
-    {
-      id: 3,
-      icon: Maximize,
-      title: 'Negative Space',
-      description: 'Breathing room is a feature. Mastering the art of emptiness to give content maximum impact.',
-    },
-    {
-      id: 4,
-      icon: Palette,
-      title: 'Intentional Color',
-      description: 'Restrained palettes. Using color as a functional tool for hierarchy and focus, never just for decoration.',
-    },
-    {
-      id: 5,
-      icon: Monitor,
-      title: 'Dark Mode UI',
-      description: 'Comfort and contrast. designing specifically for low-light environments with softer hues and reduced strain.',
-    },
-    {
-      id: 6,
-      icon: Aperture,
-      title: 'Motion Kinetics',
-      description: 'Physics-based interactions. Ensuring every movement has weight, momentum, and a natural feel.',
-    },
-  ];
+export default function Aesthetics() {
+  const section = useRef<HTMLElement>(null);
+  useSectionMotion(section, '.study-shell');
+  const [active, setActive] = useState(0);
+  const [space, setSpace] = useState(24);
+  const [tone, setTone] = useState(0);
+  const reduced = useMotionPreference();
 
-  useEffect(() => {
-    const container = scrollerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      if (window.innerWidth >= 1024) {
-        setActiveIndex(null);
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const containerCenter = containerRect.left + containerRect.width / 2;
-
-      let closestIndex: number | null = null;
-      let minDiff = Infinity;
-
-      container.querySelectorAll('[data-scroll-item]').forEach((item) => {
-        const itemRect = item.getBoundingClientRect();
-        const itemCenter = itemRect.left + itemRect.width / 2;
-        const diff = Math.abs(containerCenter - itemCenter);
-
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIndex = Number(item.getAttribute('data-index'));
-        }
-      });
-
-      if (closestIndex !== null) {
-        setActiveIndex(closestIndex);
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
-    handleScroll();
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, []);
-
-  return (
-    <section
-      id="aesthetics"
-      className="py-16 sm:py-[60px] scroll-mt-[40px]"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
-        <div className="mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Aesthetics</h2>
-          <p className="text-muted text-base sm:text-lg max-w-2xl leading-relaxed">
-            Design isn't just about problem-solving; it's about feeling.
-            These are the visual principles and patterns that I enjoy exploring.
-          </p>
+  return <section ref={section} id="aesthetics" className="editorial-section">
+    <SectionIntro title="Experiments." />
+    <div className="study-shell"><div className="study-tabs" role="tablist" aria-label="Design experiments">{studies.map(({ title, icon: Icon }, i) => <button role="tab" id={`study-tab-${i}`} aria-controls="study-panel" aria-selected={active === i} tabIndex={active === i ? 0 : -1} key={title} onClick={() => setActive(i)} onKeyDown={event => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); const next = (i + (event.key === 'ArrowRight' ? 1 : 2)) % 3; setActive(next); document.getElementById(`study-tab-${next}`)?.focus(); } }} className={active === i ? 'active' : ''}><Icon size={19} /><span>{title}</span></button>)}</div>
+      <div className="study-canvas" role="tabpanel" id="study-panel" aria-labelledby={`study-tab-${active}`} tabIndex={0}>
+      <AnimatePresence mode="wait" initial={false}><motion.div key={active} className="study-stage" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .18 }}>
+        <div className="experiment-poster" style={{ backgroundColor: active === 1 ? palette[tone].color : '#d60000', color: active === 1 ? palette[tone].text : '#ffffff' }}><motion.h3 style={{ letterSpacing: active === 0 ? `${-.065 + (space - 12) / 500}em` : '-.045em' }} initial={reduced ? false : { opacity: 0, filter: 'blur(8px)' }} animate={{ opacity: 1, filter: 'blur(0px)' }} transition={{ duration: reduced ? 0 : .4, ease: 'easeOut' }}>{['Make', 'Read', 'Feel'][active]}<br /><span>{['space.', 'clearly.', 'it work.'][active]}</span></motion.h3>
+          <motion.div className="experiment-detail" animate={{ marginTop: active === 0 ? space : 24 }} transition={{ duration: reduced ? 0 : .2 }}>{active === 2 ? <FeedbackButton className="experiment-save" /> : <p>{studies[active].label}</p>}</motion.div>
         </div>
-
-        {/* Aesthetics Grid */}
-        <div className="relative">
-
-          <div
-            ref={scrollerRef}
-            className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 -mx-4 px-4 pr-12 snap-x snap-mandatory scroll-px-6 lg:mx-0 lg:px-0 lg:pr-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6 lg:overflow-visible lg:pb-0 no-scrollbar"
-          >
-            <AnimatePresence mode="sync">
-              {aestheticItems.map((item, index) => {
-                const Icon = item.icon;
-                const isActive = index === activeIndex;
-                return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                    className="group relative flex-shrink-0 w-[280px] sm:w-[320px] sm:w-auto h-full snap-center snap-always"
-                    data-scroll-item
-                    data-index={index}
-                  >
-                    <div
-                      className={`relative h-full p-5 rounded-2xl card-surface transition-all duration-300 cursor-default overflow-hidden ${isActive ? 'border-primary' : 'lg:group-hover:border-primary/25 lg:group-hover:shadow-lg'}`}
-                    >
-                      <div className="relative z-10">
-                        <div
-                          className={`w-10 h-10 mb-6 flex items-center justify-center rounded-lg card-surface card-surface-hover transition-colors duration-300 transition-transform ${isActive ? 'rotate-6' : 'group-hover:rotate-6'}`}
-                        >
-                          <Icon className="w-5 h-5 text-primary transition-colors duration-300" strokeWidth={2} />
-                        </div>
-
-                        <h3 className={`text-lg font-semibold mb-3 transition-colors duration-300 ${isActive ? 'text-primary' : 'text-theme-primary group-hover:text-primary'}`}>
-                          {item.title}
-                        </h3>
-
-                        <p className="text-sm text-muted leading-relaxed line-clamp-3">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <div className={`absolute bottom-0 right-0 w-24 h-24 overflow-hidden rounded-br-2xl pointer-events-none transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                        <div className="absolute bottom-0 right-0 w-px h-8 bg-gradient-to-t from-primary/30 to-transparent" />
-                        <div className="absolute bottom-0 right-0 w-8 h-px bg-gradient-to-l from-primary/30 to-transparent" />
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
-        </div>
-      </motion.div>
-    </section>
-  );
-};
-
-export default Aesthetics;
+        <div className="experiment-controls">{active === 0 ? <label className="space-control"><span>Letter spacing</span><input type="range" min="12" max="44" value={space} onChange={event => setSpace(+event.target.value)} aria-label="Adjust letter spacing" /></label> : active === 1 ? <div className="contrast-controls" role="group" aria-label="Background color">{palette.map(({ name, color, text }, i) => <button type="button" key={name} onClick={() => setTone(i)} style={{ backgroundColor: color, color: text }} aria-pressed={tone === i}>{name}</button>)}</div> : <span>Try it again. Every action gets a response.</span>}</div>
+      </motion.div></AnimatePresence></div>
+    </div>
+  </section>;
+}

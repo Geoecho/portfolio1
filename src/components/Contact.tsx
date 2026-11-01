@@ -1,8 +1,9 @@
 import { useState, FormEvent } from 'react';
-import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
-
-const Contact = () => {
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUpRight, Check, Loader2 } from './AnimatedIcons';
+import { reveal } from './SectionIntro';
+import SocialLinks from './SocialLinks';
+const Contact = ({ onBackToTop }: { onBackToTop: () => void }) => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [email, setEmail] = useState('');
@@ -17,13 +18,10 @@ const Contact = () => {
     setErrorMessage(null);
 
     try {
-      // Create the payload for Web3Forms
-      // IMPORTANT: You need to obtain an Access Key from https://web3forms.com/
-      // and replace 'YOUR_ACCESS_KEY_HERE' below.
       const payload = {
         access_key: 'd6cbadbf-da77-4dc1-9315-6db51265b7f0',
         email,
-        subject: heading, // Map 'heading' to 'subject' for clarity in email
+        subject: heading,
         message,
         from_name: 'Portfolio Contact Form',
         botcheck: false, // Hidden field to prevent spam
@@ -43,7 +41,7 @@ const Contact = () => {
       if (!data.success) {
         setErrorMessage(data.message || 'Failed to send. Try again.');
         setStatus('error');
-        setTimeout(() => setStatus('idle'), 3000);
+
         return;
       }
 
@@ -53,144 +51,31 @@ const Contact = () => {
       setHeading('');
       setMessage('');
 
-      setTimeout(() => {
-        setStatus('idle');
-      }, 3000);
+
     } catch (error) {
       console.error('Error sending email', error);
       setErrorMessage('Network error. Check your connection and try again.');
       setStatus('error');
-      setTimeout(() => setStatus('idle'), 3000);
+
     }
   };
 
-  return (
-    <section
-      id="contact"
-      className="min-h-[100dvh] flex flex-col justify-center items-center text-center scroll-mt-[40px] pt-20 pb-36 lg:pb-48"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="w-full flex flex-col items-center"
-      >
-        <div className="w-full max-w-2xl px-4 sm:px-0">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Contact</h2>
-          <p className="text-muted mb-12 max-w-xl mx-auto">
-            Feel free to contact me at any time.
-          </p>
-
-          <form className="space-y-6 w-full" onSubmit={handleSubmit}>
-            <div>
-              <input
-                type="email"
-                placeholder="Enter your email..."
-                className="w-full px-4 py-3 rounded-lg input-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder="Heading"
-                className="w-full px-4 py-3 rounded-lg input-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                value={heading}
-                onChange={(e) => setHeading(e.target.value)}
-              />
-            </div>
-            <div>
-              <textarea
-                placeholder="Type your message here..."
-                rows={3}
-                className="w-full px-4 py-3 rounded-lg input-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    const form = e.currentTarget.form;
-                    if (form) {
-                      form.requestSubmit();
-                    }
-                  }
-                }}
-                onInput={(e) => {
-                  const el = e.currentTarget;
-                  el.style.height = 'auto';
-                  el.style.height = `${el.scrollHeight}px`;
-                }}
-              />
-            </div>
-
-            <motion.button
-              type="submit"
-              disabled={status === 'loading'}
-              whileHover={status === 'idle' ? { scale: 1.02, y: -1 } : {}}
-              whileTap={status === 'idle' ? { scale: 0.98, y: 0 } : {}}
-              animate={
-                status === 'success'
-                  ? { scale: 1, backgroundColor: 'rgb(255, 107, 107)', color: '#FFFFFF' }
-                  : status === 'error'
-                    ? { scale: 1, backgroundColor: 'rgb(255, 107, 107)', color: '#FFFFFF' }
-                    : status === 'loading'
-                      ? { scale: 0.98, opacity: 0.9 }
-                      : { scale: 1, opacity: 1, backgroundColor: 'rgb(255, 107, 107)', color: '#FFFFFF' }
-              }
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors relative overflow-hidden"
-            >
-              {status === 'loading' && (
-                <motion.div
-                  className="flex items-center justify-center gap-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <span className="text-sm font-medium">Sending</span>
-                  <motion.span
-                    className="h-4 w-4 rounded-full border-2 border-white/50 border-t-white"
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 0.6, ease: 'linear' }}
-                  />
-                </motion.div>
-              )}
-              {status === 'success' && (
-                <motion.div
-                  className="flex items-center justify-center gap-2"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                >
-                  <span className="text-sm font-semibold tracking-wide">Sent</span>
-                  <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.1 }}
-                  >
-                    <Check className="h-4 w-4" strokeWidth={3} />
-                  </motion.div>
-                </motion.div>
-              )}
-              {status === 'error' && (
-                <motion.div
-                  className="flex items-center justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <span className="text-sm font-semibold">{errorMessage ?? 'Failed to send. Try again.'}</span>
-                </motion.div>
-              )}
-              {status === 'idle' && (
-                <span className="text-sm font-medium">Submit</span>
-              )}
-            </motion.button>
-          </form>
-        </div>
-      </motion.div>
-    </section>
-  );
+  return <section id="contact" className="editorial-section contact-section">
+    <motion.div {...reveal} className="contact-layout">
+      <div className="contact-copy"><h2>Let’s work<br />together<span>.</span></h2><p>Tell me what you’re making and where you want to take it.</p><div className="contact-socials"><SocialLinks labels /></div></div>
+      <div className="contact-form-wrap"><AnimatePresence mode="wait">
+        {status === 'success' ? <motion.div className="contact-success" key="success" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} role="status"><motion.span className="success-mark" initial={{ scale: .7 }} animate={{ scale: 1 }} transition={{ type: 'spring' }}><Check size={30} /></motion.span><h3>Message sent.</h3><p>Thanks for reaching out. I'll get back to you by email.</p><button type="button" onClick={() => setStatus('idle')} className="text-link">Send another message <ArrowUpRight size={18} /></button></motion.div>
+        : <motion.form key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onSubmit={handleSubmit} className="contact-form" aria-busy={status === 'loading'}>
+          <label htmlFor="contact-email">Your email<input id="contact-email" type="email" name="email" required autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} /></label>
+          <label htmlFor="contact-subject">What are you working on?<input id="contact-subject" name="subject" type="text" required placeholder="A website, an app, an idea…" value={heading} onChange={event => setHeading(event.target.value)} /></label>
+          <label htmlFor="contact-message">A little about your project<textarea id="contact-message" name="message" required rows={4} placeholder="The idea, the challenge, and where you'd like to take it." value={message} onChange={event => setMessage(event.target.value)} /></label>
+          <AnimatePresence>{status === 'error' && <motion.p role="alert" className="form-error" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>{errorMessage}</motion.p>}</AnimatePresence>
+          <motion.button disabled={status === 'loading'} type="submit" className="contact-send" whileHover={{ y: -2 }} whileTap={{ scale: .98 }}><span>{status === 'loading' ? 'Sending…' : status === 'error' ? 'Try again' : 'Send message'}</span>{status === 'loading' ? <Loader2 size={18} className="loading-spinner" /> : <ArrowUpRight size={20} />}</motion.button><p className="form-footnote">Your details are used to respond to your enquiry. <a href="/privacy" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</a>.</p>
+        </motion.form>}
+      </AnimatePresence></div>
+    </motion.div>
+    <footer className="portfolio-footer"><p>Hristijan Bristić</p><div className="footer-links"><a className="text-link" href="/privacy" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</a><button type="button" className="text-link" onClick={onBackToTop}>Back to top <ArrowUpRight size={16} /></button></div></footer>
+  </section>;
 };
 
 export default Contact;
