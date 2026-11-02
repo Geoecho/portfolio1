@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { ArrowUpRight, Loader2, Pause, Play, Minimize2, Maximize2 } from './AnimatedIcons';
 import { loadSpotifyEmbed, type SpotifyController } from '../lib/spotifyEmbed';
 
-const track = 'https://open.spotify.com/track/2t5GyUfFoZg3E8ak3i7dVP';
+const playlist = 'https://open.spotify.com/playlist/1RSIm5lQoC00c7lCt58YcC';
 
 export default function MusicPlayer() {
   const [requested, setRequested] = useState(false);
@@ -12,6 +12,7 @@ export default function MusicPlayer() {
   const [error, setError] = useState('');
   const [minimized, setMinimized] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [showTracks, setShowTracks] = useState(false);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const host = useRef<HTMLDivElement>(null);
   const controller = useRef<SpotifyController | null>(null);
@@ -48,14 +49,14 @@ export default function MusicPlayer() {
       pending.current = false;
       setLoading(false);
       setRequested(false);
-      setError('Spotify could not load. Try again or open the track in Spotify.');
+      setError('Spotify could not load. Try again or open the playlist in Spotify.');
     };
     void loadSpotifyEmbed().then(api => {
       if (cancelled || !host.current) return;
       const placeholder = document.createElement('div');
       host.current.replaceChildren(placeholder);
       readyTimer.current = window.setTimeout(fail, 15000);
-      api.createController(placeholder, { url: `${track}?theme=0`, width: '100%', height: 80 }, embed => {
+      api.createController(placeholder, { url: `${playlist}?theme=0`, width: '100%', height: 152 }, embed => {
         if (cancelled) { embed.destroy(); return; }
         controller.current = embed;
         eagerLoad();
@@ -90,19 +91,20 @@ export default function MusicPlayer() {
     setRequested(true);
   };
 
-  const label = loading ? 'Loading Spotify player' : playing ? 'Pause Maggot Brain' : 'Play Maggot Brain on Spotify';
+  const label = loading ? 'Loading Spotify playlist' : playing ? 'Pause guitar playlist' : 'Play guitar playlist on Spotify';
   return <>
     <div className="music-controls">
     <button type="button" className={`dock-icon music-trigger ${playing ? 'is-playing' : ''}`} onClick={toggle} aria-label={label} title={label} aria-pressed={playing} aria-busy={loading} disabled={loading}>
       {loading ? <Loader2 size={19} className="loading-spinner" /> : playing ? <Pause size={19} /> : <Play size={19} />}
     </button>
-    {requested && <button type="button" className="dock-icon music-minimize" onClick={() => setMinimized(value => !value)} aria-label={minimized ? 'Expand Spotify player' : 'Minimize Spotify player'} aria-expanded={!minimized} aria-controls="spotify-player"><span className="music-track-label">Maggot Brain · Spotify</span>{minimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}</button>}
+    {requested && <button type="button" className="dock-icon music-minimize" onClick={() => setMinimized(value => !value)} aria-label={minimized ? 'Expand Spotify player' : 'Minimize Spotify player'} aria-expanded={!minimized} aria-controls="spotify-player"><span className="music-track-label">Guitar playlist · Spotify</span>{minimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}</button>}
     </div>
-    <span className="sr-only" role="status">{error || (loading ? 'Loading Maggot Brain from Spotify.' : playing ? 'Maggot Brain is playing.' : '')}</span>
-    {error && <a className="music-error" href={track} target="_blank" rel="noopener noreferrer">Open in Spotify <ArrowUpRight size={15} /></a>}
+    <span className="sr-only" role="status">{error || (loading ? 'Loading the guitar playlist from Spotify.' : playing ? 'The guitar playlist is playing.' : '')}</span>
+    {error && <a className="music-error" href={playlist} target="_blank" rel="noopener noreferrer">Open in Spotify <ArrowUpRight size={15} /></a>}
     {slot && requested && createPortal(<section id="spotify-player" className={`top-bar-music ${minimized ? 'is-minimized' : ''}`} aria-label="Spotify music player" aria-hidden={minimized} {...(minimized ? { inert: '' } : {})}>
-      <div ref={host} className="music-embed-host" />
-      {preview && <p className="music-preview-notice">Spotify preview · <a href={track} target="_blank" rel="noopener noreferrer">Open full track <ArrowUpRight size={13} /></a></p>}
+      <div ref={host} id="music-playlist-embed" className={`music-embed-host ${showTracks ? 'show-tracks' : ''}`} />
+      <div className="music-playlist-actions"><button type="button" onClick={() => setShowTracks(value => !value)} aria-expanded={showTracks} aria-controls="music-playlist-embed">{showTracks ? 'Hide tracks' : 'Show tracks'}</button><a href={playlist} target="_blank" rel="noopener noreferrer">Open in Spotify</a></div>
+      {preview && <p className="music-preview-notice">Spotify preview · Open in Spotify for full playback.</p>}
     </section>, slot)}
   </>;
 }
