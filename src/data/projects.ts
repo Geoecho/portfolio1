@@ -27,8 +27,23 @@ import gridline3 from '../assets/gridline-3.png';
 import anitaHome from '../assets/anita-home.jpg';
 import anitaWork from '../assets/anita-work.jpg';
 import anitaDetail from '../assets/anita-detail.jpg';
+import tempoAdmin from '../assets/tempo/admin.webp';
+import tempoShifts from '../assets/tempo/shifts.webp';
+import tempoTime from '../assets/tempo/time.webp';
+import tempoWelcome from '../assets/tempo/welcome.webp';
 
 export const projects = [
+    {
+      id: 7,
+      name: 'Tempo',
+      description: 'A workforce app for planning shifts, coordinating crews, and reviewing hours and estimated pay. Clear views for admins and employees.',
+      longDescription: 'Tempo brings shift planning, teams, QR check-ins, and time review into one workforce app. Admins coordinate assignments and review hours and estimated pay; workers see their shifts and check in at their sites. The experience connects a responsive workspace with a clear introduction to the platform, keeping people and their working day in sync.',
+      image: tempoWelcome,
+      detailImages: [tempoWelcome, tempoAdmin, tempoShifts, tempoTime],
+      category: 'App Design',
+      url: 'https://tempo-workforce.vercel.app/',
+      thumbPadded: true,
+    },
     {
       id: 6,
       name: 'Anita Ognjanovska',

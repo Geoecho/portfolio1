@@ -11,7 +11,7 @@ import ScrollIndicator, { setScrollIndicator } from './ScrollIndicator';
 
 type Project = typeof projects[number];
 const filters = ['All work', 'Websites', 'Apps', 'Interactions'] as const;
-const orderedProjects = [...projects].sort((a, b) => (a.id === 6 ? -2 : a.id === -1 ? -1 : 0) - (b.id === 6 ? -2 : b.id === -1 ? -1 : 0));
+const orderedProjects = [...projects].sort((a, b) => (a.id === 7 ? -3 : a.id === 6 ? -2 : a.id === -1 ? -1 : 0) - (b.id === 7 ? -3 : b.id === 6 ? -2 : b.id === -1 ? -1 : 0));
 
 function ProjectView({ project, onClose }: { project: Project; onClose: () => void }) {
   const [slide, setSlide] = useState(0);
