@@ -1019,8 +1019,8 @@ html:has(.privacy-overlay) { overflow: hidden; }
 .fullscreen-view { position: fixed; inset: 0; z-index: 300; width: 100%; height: 100dvh; background: #fff; color: #000; outline: none; overflow: hidden; overscroll-behavior: contain; }
 .fullscreen-view.project-view, .fullscreen-view.game-window, .fullscreen-view.privacy-view { width: 100vw; }
 .top-bar-play { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.top-bar-game { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 12px; background: #d60000; color: #fff; font-size: 13px; font-weight: 650; transition: background .2s, transform .2s; }
-.top-bar-game:hover { background: #000; transform: translateY(-1px); }
+.top-bar-game { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 12px; background: #fff; color: #000; font-size: 13px; font-weight: 650; transition: background .2s, color .2s, transform .2s; }
+.top-bar-game:hover { background: #000; color: #fff; transform: translateY(-1px); }
 .top-bar-game:active { transform: scale(.96); }
 .view-back { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 12px 10px 0; font-size: 14px; font-weight: 600; white-space: nowrap; }
 .view-back .animated-lucide { color: #d60000; }
