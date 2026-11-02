@@ -996,7 +996,7 @@ html.lenis,html.lenis body { height: auto; }
   .hero-stack-hit { border-radius: 20px; }
 }/* Standalone views share the same edges, navigation and white canvas. */
 .fullscreen-view { position: fixed; inset: 0; z-index: 300; width: 100%; height: 100dvh; background: #fff; color: #000; outline: none; overflow: hidden; overscroll-behavior: contain; }
-.fullscreen-view.project-view, .fullscreen-view.game-window { width: 100vw; }
+.fullscreen-view.project-view, .fullscreen-view.game-window, .fullscreen-view.privacy-view { width: 100vw; }
 .top-bar-play { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .top-bar-game { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 12px; background: #d60000; color: #fff; font-size: 13px; font-weight: 650; transition: background .2s, transform .2s; }
 .top-bar-game:hover { background: #000; transform: translateY(-1px); }
@@ -1104,4 +1104,36 @@ html.lenis,html.lenis body { height: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
   .top-bar-game, .project-image-dots button > span { transition: none; }
+}
+/* Desktop projects use a viewing canvas sized to the window, not the image width. */
+.hero-title > .hero-title-line { display: block; color: #000; }
+.hero-title > .hero-title-accent { color: #d60000; }
+@media (min-width: 1024px) {
+  .project-view-bar { padding-inline: max(40px,calc((100vw - 1320px)/2)); }
+  .project-view-scroll { display: grid; grid-template-columns: minmax(260px,.68fr) minmax(0,1.52fr); align-items: center; gap: clamp(32px,4vw,72px); padding: 40px max(40px,calc((100vw - 1320px)/2)); }
+  .project-view-intro { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 24px; max-height: 100%; min-width: 0; margin: 0; padding: 12px 12px 12px 0; overflow-y: auto; }
+  .project-view-intro > div { width: 100%; }
+  .project-view-intro > div > p { margin-bottom: 16px; }
+  .project-view-intro h2 { font-size: clamp(36px,3.6vw,56px); line-height: 1.04; letter-spacing: -.05em; overflow-wrap: anywhere; }
+  .project-view-description { max-width: 370px; font-size: 14px; line-height: 1.85; text-wrap: pretty; }
+  .project-view-gallery { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; }
+  .project-image-stage { flex: 1; min-height: 0; width: 100%; padding: 24px; align-items: center; border-radius: 20px; box-shadow: 0 6px 36px #00000007; }
+  .project-image-stage img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; flex: 0 1 auto; border-radius: 8px; }
+  .project-image-controls { position: static; flex-shrink: 0; margin: 20px auto 0; padding: 0 8px; box-shadow: none; background: transparent; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .project-view-intro { align-items: start; gap: 28px; }
+  .project-view-intro h2 { font-size: 44px; }
+  .project-image-stage { height: 64dvh; min-height: 0; padding: 20px; align-items: center; }
+  .project-image-stage img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+  .project-image-controls { position: static; }
+}
+.privacy-view { display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
+.privacy-view-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom); }
+.privacy-view .privacy-header { margin-top: 12px; }
+.project-image-stage, .project-image-stage img { touch-action: pinch-zoom; }
+@media (max-width: 767px) {
+  .project-image-stage { height: min(66svh,600px); min-height: 0; padding: 14px; align-items: center; touch-action: pinch-zoom; }
+  .project-image-stage img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; touch-action: pinch-zoom; }
+  .project-image-controls { position: static; margin-top: 16px; background: transparent; box-shadow: none; }
 }

@@ -16,6 +16,11 @@ const orderedProjects = [...projects].sort((a, b) => (a.id === 6 ? -2 : a.id ===
 function ProjectView({ project, onClose }: { project: Project; onClose: () => void }) {
   const [slide, setSlide] = useState(0);
   const reduced = useMotionPreference();
+  const reveal = (delay = 0) => ({
+    initial: reduced ? false as const : { opacity: 0, y: 12, filter: 'blur(7px)' },
+    animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+    transition: { duration: reduced ? 0 : .65, delay: reduced ? 0 : delay, ease: [.22, 1, .36, 1] as [number, number, number, number] },
+  });
   const go = (direction: number) => setSlide(value => Math.max(0, Math.min(project.detailImages.length - 1, value + direction)));
   useEffect(() => {
     const keyboard = (event: KeyboardEvent) => {
@@ -29,14 +34,14 @@ function ProjectView({ project, onClose }: { project: Project; onClose: () => vo
   return <FullscreenView className="project-view" labelledBy="project-title" onClose={onClose}>
     <header className="project-view-bar"><button type="button" className="view-back" onClick={onClose}><ArrowLeft size={20} /><span>Back</span></button><span className="project-view-name">{project.name}</span>{project.url && <a className="project-visit" href={project.url} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={18} /></a>}</header>
     <div className="project-view-scroll">
-      <div className="project-view-intro"><div><p>{project.category}</p><h2 id="project-title">{project.name}<span>.</span></h2></div><p className="project-view-description">{project.longDescription}</p></div>
-      <div className="project-view-gallery">
+      <div className="project-view-intro"><motion.div {...reveal(.18)}><p>{project.category}</p><h2 id="project-title">{project.name}<span>.</span></h2></motion.div><motion.p {...reveal(.26)} className="project-view-description">{project.longDescription}</motion.p></div>
+      <motion.div {...reveal(.3)} className="project-view-gallery">
         <div className="project-image-stage">
-          <AnimatePresence mode="wait" initial={false}><motion.img key={slide} src={project.detailImages[slide]} alt={project.name + ' design, image ' + (slide + 1)} initial={{ opacity: 0, y: reduced ? 0 : 16, filter: reduced ? 'none' : 'blur(6px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .3 }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={.12} onDragEnd={(_, info) => { if (info.offset.x < -50) go(1); if (info.offset.x > 50) go(-1); }} /></AnimatePresence>
+          <AnimatePresence mode="wait" initial={false}><motion.img key={slide} src={project.detailImages[slide]} alt={project.name + ' design, image ' + (slide + 1)} initial={{ opacity: 0, y: reduced ? 0 : 16, filter: reduced ? 'none' : 'blur(6px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .3 }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={.12} dragMomentum={false} onDragEnd={(_, info) => { if (info.offset.x < -40 || (info.offset.x < -12 && info.velocity.x < -450)) go(1); else if (info.offset.x > 40 || (info.offset.x > 12 && info.velocity.x > 450)) go(-1); }} /></AnimatePresence>
         </div>
         <div className="project-image-controls"><button type="button" className="icon-button" disabled={slide === 0} onClick={() => go(-1)} aria-label="Previous image"><ArrowLeft size={20} /></button><div className="project-image-dots" role="group" aria-label="Project images">{project.detailImages.map((src, i) => <button type="button" key={src} onClick={() => setSlide(i)} aria-label={ 'Show image ' + (i + 1)} aria-pressed={slide === i}><span /></button>)}</div><button type="button" className="icon-button" disabled={slide === project.detailImages.length - 1} onClick={() => go(1)} aria-label="Next image"><ArrowRight size={20} /></button></div>
         <span className="sr-only" role="status">Image {slide + 1} of {project.detailImages.length}</span>
-      </div>
+      </motion.div>
     </div>
   </FullscreenView>;
 }

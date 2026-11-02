@@ -14,6 +14,9 @@ import TopBar from './components/TopBar';
 import BackToTop from './components/BackToTop';
 import KineticGrid from './components/KineticGrid';
 import { projects } from './data/projects';
+import FullscreenView from './components/FullscreenView';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import { ArrowLeft } from './components/AnimatedIcons';
 
 const TypeRush = lazy(() => import('./components/TypeRush'));
 const readView = () => new URLSearchParams(window.location.search).get('view');
@@ -88,11 +91,12 @@ function App() {
           <DesignPhilosophy />
           <Skills />
           <Aesthetics />
-          <Contact />
+          <Contact onOpenPrivacy={() => openView('privacy')} />
         </div>
       </main>
     </div>
     {createPortal(<Suspense fallback={null}><AnimatePresence>{view === 'game' && <TypeRush onClose={closeView} />}</AnimatePresence></Suspense>, document.body)}
+    {createPortal(<AnimatePresence>{view === 'privacy' && <FullscreenView className="privacy-view" labelledBy="privacy-title" onClose={closeView}><header className="project-view-bar"><button type="button" className="view-back" onClick={closeView}><ArrowLeft size={20} /><span>Back</span></button><span className="project-view-name">Privacy</span></header><div className="privacy-view-scroll"><PrivacyPolicy embedded onContact={() => { closeView(); window.setTimeout(scrollToContact, 700); }} /></div></FullscreenView>}</AnimatePresence>, document.body)}
     </MotionConfig>
   );
 }

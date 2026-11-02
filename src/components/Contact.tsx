@@ -1,14 +1,19 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, Check, Loader2 } from './AnimatedIcons';
 import { reveal } from './SectionIntro';
 import SocialLinks from './SocialLinks';
-const Contact = () => {
+const Contact = ({ onOpenPrivacy }: { onOpenPrivacy: () => void }) => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [heading, setHeading] = useState('');
   const [message, setMessage] = useState('');
+  const openPrivacy = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    onOpenPrivacy();
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,11 +75,11 @@ const Contact = () => {
           <label htmlFor="contact-subject">What are you working on?<input id="contact-subject" name="subject" type="text" required placeholder="A website, an app, an idea…" value={heading} onChange={event => setHeading(event.target.value)} /></label>
           <label htmlFor="contact-message">A little about your project<textarea id="contact-message" name="message" required rows={4} placeholder="The idea, the challenge, and where you'd like to take it." value={message} onChange={event => setMessage(event.target.value)} /></label>
           <AnimatePresence>{status === 'error' && <motion.p role="alert" className="form-error" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>{errorMessage}</motion.p>}</AnimatePresence>
-          <motion.button disabled={status === 'loading'} type="submit" className="contact-send" whileHover={{ y: -2 }} whileTap={{ scale: .98 }}><span>{status === 'loading' ? 'Sending…' : status === 'error' ? 'Try again' : 'Send message'}</span>{status === 'loading' ? <Loader2 size={18} className="loading-spinner" /> : <ArrowUpRight size={20} />}</motion.button><p className="form-footnote">Your details are used to respond to your enquiry. <a href="/privacy" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</a>.</p>
+          <motion.button disabled={status === 'loading'} type="submit" className="contact-send" whileHover={{ y: -2 }} whileTap={{ scale: .98 }}><span>{status === 'loading' ? 'Sending…' : status === 'error' ? 'Try again' : 'Send message'}</span>{status === 'loading' ? <Loader2 size={18} className="loading-spinner" /> : <ArrowUpRight size={20} />}</motion.button><p className="form-footnote">Your details are used to respond to your enquiry. <a href="/privacy" onClick={openPrivacy}>Privacy policy</a>.</p>
         </motion.form>}
       </AnimatePresence></div>
     </motion.div>
-    <footer className="portfolio-footer"><p>Hristijan Bristić</p><div className="footer-links"><a className="text-link" href="/privacy" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</a></div></footer>
+    <footer className="portfolio-footer"><p>Hristijan Bristić</p><div className="footer-links"><a className="text-link" href="/privacy" onClick={openPrivacy}>Privacy policy</a></div></footer>
   </section>;
 };
 
