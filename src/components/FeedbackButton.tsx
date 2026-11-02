@@ -22,7 +22,7 @@ export default function FeedbackButton({ className, previewOnHover = false }: { 
     card.addEventListener('mouseenter', run);
     card.addEventListener('mouseleave', reset);
     const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) { run(); observer.disconnect(); }
+      entries.forEach(entry => { if (entry.isIntersecting && entry.intersectionRatio >= .7) run(); else reset(); });
     }, { threshold: .7 });
     observer.observe(button.current);
     return () => { observer.disconnect(); card.removeEventListener('mouseenter', run); card.removeEventListener('mouseleave', reset); };

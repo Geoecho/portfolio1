@@ -13,7 +13,7 @@ const principles = [
 
 export default function DesignPhilosophy() {
   const section = useRef<HTMLElement>(null);
-  useSectionMotion(section, '.principle-card');
+  useSectionMotion(section, '.principle-card', true);
   useGSAP(() => {
     const media = gsap.matchMedia();
     media.add('(prefers-reduced-motion: no-preference)', () => {
@@ -38,7 +38,7 @@ export default function DesignPhilosophy() {
         card.addEventListener('focusin', play);
         card.addEventListener('focusout', blur);
         card.addEventListener('click', play);
-        ScrollTrigger.create({ trigger: card, start: 'top 85%', once: true, onEnter: play });
+        ScrollTrigger.create({ trigger: card, start: 'top 85%', end: 'bottom 15%', onEnter: play, onEnterBack: play, onLeave: reset, onLeaveBack: reset });
         cleanups.push(() => {
           card.removeEventListener('mouseenter', play);
           card.removeEventListener('mouseleave', reset);

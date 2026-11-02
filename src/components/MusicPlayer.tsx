@@ -97,7 +97,6 @@ export default function MusicPlayer() {
       {loading ? <Loader2 size={19} className="loading-spinner" /> : playing ? <Pause size={19} /> : <Play size={19} />}
     </button>
     {requested && <button type="button" className="dock-icon music-minimize" onClick={() => setMinimized(value => !value)} aria-label={minimized ? 'Expand Spotify player' : 'Minimize Spotify player'} aria-expanded={!minimized} aria-controls="spotify-player"><span className="music-track-label">Maggot Brain · Spotify</span>{minimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}</button>}
-    {requested && <a className="dock-icon music-open" href={track} target="_blank" rel="noopener noreferrer" aria-label="Open Maggot Brain in Spotify" title="Open the full track in Spotify"><ArrowUpRight size={18} /></a>}
     </div>
     <span className="sr-only" role="status">{error || (loading ? 'Loading Maggot Brain from Spotify.' : playing ? 'Maggot Brain is playing.' : '')}</span>
     {error && <a className="music-error" href={track} target="_blank" rel="noopener noreferrer">Open in Spotify <ArrowUpRight size={15} /></a>}

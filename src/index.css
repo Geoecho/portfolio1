@@ -994,4 +994,114 @@ html.lenis,html.lenis body { height: auto; }
 @media (max-width: 767px) {
   .hero-stack-track { right: -20px; }
   .hero-stack-hit { border-radius: 20px; }
+}/* Standalone views share the same edges, navigation and white canvas. */
+.fullscreen-view { position: fixed; inset: 0; z-index: 300; width: 100%; height: 100dvh; background: #fff; color: #000; outline: none; overflow: hidden; overscroll-behavior: contain; }
+.fullscreen-view.project-view, .fullscreen-view.game-window { width: 100vw; }
+.top-bar-play { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.top-bar-game { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 12px; background: #d60000; color: #fff; font-size: 13px; font-weight: 650; transition: background .2s, transform .2s; }
+.top-bar-game:hover { background: #000; transform: translateY(-1px); }
+.top-bar-game:active { transform: scale(.96); }
+.view-back { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 12px 10px 0; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.view-back .animated-lucide { color: #d60000; }
+.view-back:hover { color: #d60000; }
+.project-view { display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
+.project-view-bar { flex-shrink: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; min-height: 80px; padding: 12px max(24px,calc((100vw - 1280px)/2)); box-shadow: 0 5px 28px #00000006; z-index: 2; }
+.project-view-bar > .view-back { justify-self: start; }
+.project-view-name { font-size: 14px; font-weight: 650; letter-spacing: -.02em; }
+.project-visit { justify-self: end; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: #d60000; font-size: 13px; font-weight: 600; }
+.project-view-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 48px max(24px,calc((100vw - 1200px)/2)) max(32px,env(safe-area-inset-bottom)); }
+.project-view-intro { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 40px; margin-bottom: 40px; }
+.project-view-intro > div > p { color: #d60000; font-size: 13px; font-weight: 550; margin-bottom: 12px; }
+.project-view-intro h2 { font-size: clamp(42px,5vw,76px); font-weight: 750; line-height: 1; letter-spacing: -.055em; }
+.project-view-intro h2 > span { color: #d60000; }
+.project-view-description { max-width: 500px; font-size: 15px; line-height: 1.75; }
+.project-view-gallery { position: relative; }
+.project-image-stage { min-height: 360px; display: flex; justify-content: center; align-items: flex-start; border-radius: 20px; background: #fff; box-shadow: 0 6px 40px #00000009; overflow: hidden; }
+.project-image-stage img { display: block; width: 100%; height: auto; touch-action: pan-y; user-select: none; -webkit-user-drag: none; }
+.project-image-controls { position: sticky; bottom: 12px; display: flex; align-items: center; gap: 12px; width: max-content; max-width: 100%; margin: 24px auto 0; padding: 4px 10px; border-radius: 16px; background: #fff; box-shadow: 0 4px 30px #00000010; }
+.project-image-controls .icon-button:disabled { opacity: .25; }
+.project-image-dots { display: flex; align-items: center; justify-content: center; max-width: 240px; overflow-x: auto; scrollbar-width: none; }
+.project-image-dots button { display: flex; align-items: center; justify-content: center; min-width: 24px; height: 44px; }
+.project-image-dots button > span { width: 5px; height: 5px; background: #000; border-radius: 4px; transition: width .3s, background .3s; }
+.project-image-dots button[aria-pressed="true"] > span { width: 22px; background: #d60000; }
+.rush-game.game-window { overflow: hidden; }
+.game-window .rush-toolbar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; min-height: 52px; margin-bottom: 20px; }
+.game-window .rush-tools { justify-self: end; }
+.game-window .game-back { justify-self: start; }
+.game-window .rush-identity > .animated-lucide { display: none; }
+.game-window .rush-identity { text-align: center; }
+.game-window .rush-identity h3 { font-size: 20px; font-weight: 750; }
+.game-window .rush-hud { gap: 12px; }
+.game-window .rush-stat { min-height: 76px; box-shadow: none; padding: 8px 18px; }
+.game-window .rush-stat:first-child { padding-left: 0; }
+.game-window .rush-challenge { margin-bottom: 16px; }
+.game-window .rush-field { box-shadow: 0 4px 36px #00000008; border-radius: 24px; }
+.game-window .rush-overlay { background: #ffffffed; }
+.game-window .rush-overlay-content { max-width: 480px; }
+.game-window .rush-overlay h4 { font-size: clamp(44px,6vw,76px); line-height: .98; letter-spacing: -.065em; }
+.game-window .rush-overlay .rush-kicker { font-size: 11px; margin-bottom: 18px; }
+.rush-welcome-mark { display: inline-flex; color: #d60000; margin-bottom: 22px; }
+.game-window .rush-ready-tip { margin-top: 18px; font-size: 13px; }
+.game-window .rush-rules { margin-top: 28px; max-width: 350px; }
+.game-window .rush-modes, .game-window .rush-start { width: min(100%,350px); }
+.game-window .rush-modes { margin-top: 20px; }
+.game-window .rush-start { font-size: 14px; min-height: 52px; }
+.game-window .rush-personal-best { font-size: 11px; margin-top: 18px; }
+.rush-personal-best strong { margin-left: 8px; font-weight: 700; }
+.game-window.phase-ready .rush-hud, .game-window.phase-ready .rush-challenge,
+.game-window.phase-ended .rush-hud, .game-window.phase-ended .rush-challenge { display: none; }
+.game-window.phase-ready .rush-timer-track, .game-window.phase-ended .rush-timer-track { display: none; }
+.game-window .rush-instructions { margin-top: 14px; }
+@media (max-width: 767px) {
+  .top-bar-play { gap: 2px; }
+  .top-bar-game { padding: 10px; gap: 6px; font-size: 12px; }
+  .music-minimize { gap: 0; }
+  .study-tabs { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .study-tabs > button { flex-direction: column; justify-content: center; gap: 8px; min-height: 72px; padding: 10px 4px; font-size: 11px; }
+  .project-view-bar { min-height: 68px; padding: 8px 20px; gap: 12px; grid-template-columns: 1fr auto; }
+  .project-view-name { display: none; }
+  .project-view-scroll { padding: 28px 20px max(24px,env(safe-area-inset-bottom)); }
+  .project-view-intro { grid-template-columns: 1fr; gap: 20px; margin-bottom: 28px; }
+  .project-view-description { font-size: 14px; line-height: 1.7; }
+  .project-image-stage { min-height: 200px; border-radius: 14px; }
+  .project-image-controls { gap: 4px; padding: 2px 8px; }
+  .project-image-dots { max-width: 180px; }
+  .game-window .rush-toolbar { gap: 8px; margin-bottom: 12px; }
+  .game-window .view-back { font-size: 12px; }
+  .game-window .rush-identity h3 { font-size: 17px; }
+  .game-window .rush-identity div > span { font-size: 9px; white-space: nowrap; }
+  .game-window .rush-tools .icon-button { width: 36px; }
+  .game-window .rush-hud { gap: 4px; margin-bottom: 12px; }
+  .game-window .rush-stat { padding: 6px 8px; min-height: 64px; }
+  .game-window .rush-overlay { padding: 24px 18px; }
+  .game-window .rush-overlay h4 { font-size: clamp(42px,12vw,60px); }
+  .game-window .rush-instructions { font-size: 10px; gap: 4px; margin-top: 10px; }
+  .game-window .rush-field { border-radius: 18px; }
+  .game-window .rush-welcome-mark { margin-bottom: 18px; }
+  .game-window .rush-overlay .rush-kicker { font-size: 10px; }
+}
+@media (max-height: 740px) {
+  .game-window .rush-overlay { padding-block: 16px; }
+  .game-window .rush-overlay h4 { font-size: 42px; }
+  .game-window .rush-welcome-mark { margin-bottom: 12px; }
+  .game-window .rush-welcome-mark svg { width: 30px; height: 30px; }
+  .game-window .rush-overlay .rush-kicker { margin-bottom: 12px; }
+  .game-window .rush-ready-tip { margin-top: 12px; }
+  .game-window .rush-rules { margin-top: 16px; }
+  .game-window .rush-personal-best { margin-top: 12px; }
+  .game-window .rush-modes { margin: 12px 0; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-window .rush-overlay-content { max-width: 700px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; }
+  .game-window .rush-overlay-content > * { grid-column: 1; }
+  .game-window .rush-welcome-mark, .game-window .rush-personal-best { display: none; }
+  .game-window .rush-overlay h4 { font-size: 34px; }
+  .game-window .rush-rules { grid-column: 2; grid-row: 1 / span 3; margin: 0; }
+  .game-window .rush-modes, .game-window .rush-start { grid-column: 2; }
+  .game-window .rush-modes { margin-top: 12px; margin-bottom: 8px; }
+  .game-window .rush-modes button { min-height: 40px; }
+  .game-window .rush-start { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .top-bar-game, .project-image-dots button > span { transition: none; }
 }

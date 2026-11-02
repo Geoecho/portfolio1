@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { MotionConfig } from 'framer-motion';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { AnimatePresence, MotionConfig } from 'framer-motion';
 import Hero from './components/Hero';
 import Skills from './components/Skills';
 import Characteristics from './components/Characteristics';
@@ -12,11 +13,37 @@ import { useLenis } from './hooks/useLenis';
 import TopBar from './components/TopBar';
 import BackToTop from './components/BackToTop';
 import KineticGrid from './components/KineticGrid';
+import { projects } from './data/projects';
+
+const TypeRush = lazy(() => import('./components/TypeRush'));
+const readView = () => new URLSearchParams(window.location.search).get('view');
 
 function App() {
   const { scrollToTop, scrollToContact } = useLenis();
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [view, setView] = useState(readView);
+  const selectedProjectId = projects.find(project => view === `project-${project.id}`)?.id ?? null;
+  const openView = useCallback((next: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('view', next);
+    window.history.pushState({ ...window.history.state, portfolioView: true }, '', url);
+    setView(next);
+  }, []);
+  const closeView = useCallback(() => {
+    if (window.history.state?.portfolioView) { window.history.back(); return; }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('view');
+    window.history.replaceState(window.history.state, '', url);
+    setView(null);
+  }, []);
+  const setSelectedProjectId = useCallback((id: number | null) => {
+    if (id === null) closeView(); else openView(`project-${id}`);
+  }, [closeView, openView]);
+  useEffect(() => {
+    const sync = () => setView(readView());
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, []);
 
   // Track scroll progress — direct DOM write, no re-render
   useEffect(() => {
@@ -49,7 +76,7 @@ function App() {
         />
       </div>
       <Navigation onHome={scrollToTop} onContact={scrollToContact} />
-      <TopBar />
+      <TopBar onOpenGame={() => openView('game')} />
       <BackToTop onActivate={scrollToTop} />
 
 
@@ -65,6 +92,7 @@ function App() {
         </div>
       </main>
     </div>
+    {createPortal(<Suspense fallback={null}><AnimatePresence>{view === 'game' && <TypeRush onClose={closeView} />}</AnimatePresence></Suspense>, document.body)}
     </MotionConfig>
   );
 }

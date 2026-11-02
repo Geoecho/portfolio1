@@ -2,8 +2,9 @@ import { useLayoutEffect, useRef } from 'react';
 import SocialLinks from './SocialLinks';
 import MusicPlayer from './MusicPlayer';
 import { ScrollTrigger } from '../lib/scrollMotion';
+import { Gamepad } from './AnimatedIcons';
 
-export default function TopBar() {
+export default function TopBar({ onOpenGame }: { onOpenGame: () => void }) {
   const bar = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
     let frame = 0;
@@ -26,7 +27,7 @@ export default function TopBar() {
   return <header ref={bar} className="top-bar" aria-label="Music and social links">
     <div className="top-bar-content">
       <div id="music-embed-slot" />
-      <div className="top-bar-actions"><MusicPlayer /><SocialLinks /></div>
+      <div className="top-bar-actions"><div className="top-bar-play"><MusicPlayer /><button type="button" className="top-bar-game" onClick={onOpenGame} aria-label="Play Tool Rush"><Gamepad size={20} /><span>Play</span></button></div><SocialLinks /></div>
     </div>
   </header>;
 }
