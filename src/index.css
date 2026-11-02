@@ -1157,16 +1157,10 @@ html.lenis,html.lenis body { height: auto; }
 @media (max-height: 500px) and (orientation: landscape) {
   .game-window .rush-personal-best { display: flex; grid-column: 1; margin-top: 12px; max-width: 230px; }
 }
-/* The same portrait is the personal mark and the larger About illustration. */
+/* The selected portrait lives in the About illustration. */
 .portrait-mark { display: block; width: 100%; height: 100%; overflow: hidden; }
-.portrait-home { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 3px 7px; background: transparent; border: 0; border-radius: 10px; }
-.portrait-home .portrait-mark { width: 30px; height: 38px; }
 .portrait-motion { display: grid; place-items: center; width: min(82%,260px); height: 90%; }
 .profile-portrait .portrait-mark { max-height: 310px; }
 @media (max-width: 767px) {
-  .top-bar-actions, .top-bar-play, .top-bar .music-controls, .top-bar .social-links { gap: 0; }
-  .top-bar-game { width: 44px; flex: 0 0 44px; padding: 10px; }
-  .top-bar-game > span:last-child:not(.animated-lucide) { display: none; }
-  .top-bar .social-links { flex-shrink: 0; }
   .portrait-motion { width: 85%; height: 94%; }
 }

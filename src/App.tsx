@@ -79,7 +79,7 @@ function App() {
         />
       </div>
       <Navigation onHome={scrollToTop} onContact={scrollToContact} />
-      <TopBar onHome={scrollToTop} onOpenGame={() => openView('game')} />
+      <TopBar onOpenGame={() => openView('game')} />
       <BackToTop onActivate={scrollToTop} />
 
 
