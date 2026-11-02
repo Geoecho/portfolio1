@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "npx tsc && vite build",
     "test:game": "node --experimental-strip-types --test tests/tool-rush.test.mjs",
+    "test:privacy": "node --experimental-strip-types --test tests/analytics-consent.test.mjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -14,6 +15,7 @@
     "@fontsource-variable/dm-sans": "^5.3.0",
     "@fontsource-variable/work-sans": "^5.3.0",
     "@gsap/react": "^2.1.2",
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.0.0",
     "framer-motion": "^10.16.4",
     "gsap": "^3.15.0",

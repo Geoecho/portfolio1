@@ -47,6 +47,11 @@ function App() {
     window.addEventListener('popstate', sync);
     return () => window.removeEventListener('popstate', sync);
   }, []);
+  useEffect(() => {
+    const showPrivacy = () => openView('privacy');
+    window.addEventListener('portfolio:privacy-policy', showPrivacy);
+    return () => window.removeEventListener('portfolio:privacy-policy', showPrivacy);
+  }, [openView]);
 
   // Track scroll progress — direct DOM write, no re-render
   useEffect(() => {

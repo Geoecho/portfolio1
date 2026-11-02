@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, Check, Loader2 } from './AnimatedIcons';
 import { reveal } from './SectionIntro';
 import SocialLinks from './SocialLinks';
+import { usePrivacyConsent } from './PrivacyConsent';
 const Contact = ({ onOpenPrivacy }: { onOpenPrivacy: () => void }) => {
+  const { openSettings } = usePrivacyConsent();
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [email, setEmail] = useState('');
@@ -79,7 +81,7 @@ const Contact = ({ onOpenPrivacy }: { onOpenPrivacy: () => void }) => {
         </motion.form>}
       </AnimatePresence></div>
     </motion.div>
-    <footer className="portfolio-footer"><p>Hristijan Bristić</p><div className="footer-links"><a className="text-link" href="/privacy" onClick={openPrivacy}>Privacy policy</a></div></footer>
+    <footer className="portfolio-footer"><p>Hristijan Bristić</p><div className="footer-links"><button type="button" className="text-link" onClick={openSettings}>Privacy settings</button><a className="text-link" href="/privacy" onClick={openPrivacy}>Privacy policy</a></div></footer>
   </section>;
 };
 
