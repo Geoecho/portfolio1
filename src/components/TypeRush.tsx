@@ -6,9 +6,9 @@ import { Bomb, Gamepad, Heart, ArrowLeft, Pause, Play, RotateCcw } from './Anima
 import { useMotionPreference } from '../hooks/useMotionPreference';
 import { softwareLogos } from '../data/softwareLogos';
 import { readRushRecords, saveRushRecord } from '../lib/toolRushRecords';
-import { challengeDay, createRushGame, dropMetrics, multiplier, paddleWidth, ROUND_SECONDS, rushRank, rushRanks, rushWave, seededRandom, stepRushGame, type RushGame, type RushMode, type RushPhase, type ToolId } from '../lib/typeRush';
+import { challengeDay, createRushGame, multiplier, paddleWidth, resizeRushGame, ROUND_SECONDS, rushRank, rushRanks, rushWave, seededRandom, stepRushGame, type RushGame, type RushMode, type RushPhase, type ToolId } from '../lib/typeRush';
 
-const snapshot = (game: RushGame) => ({ score: game.score, combo: game.combo, longest: game.longest, lives: game.lives, caught: game.caught, perfect: game.perfect, wave: rushWave(game.elapsed), seconds: Math.ceil(ROUND_SECONDS - game.elapsed) });
+const snapshot = (game: RushGame) => ({ score: game.score, combo: game.combo, longest: game.longest, lives: game.lives, caught: game.caught, perfect: game.perfect, wave: rushWave(game.elapsed), seconds: Math.ceil(game.remaining) });
 
 function draw(canvas: HTMLCanvasElement, game: RushGame) {
   const ctx = canvas.getContext('2d');
@@ -27,15 +27,16 @@ function draw(canvas: HTMLCanvasElement, game: RushGame) {
     ctx.save(); ctx.globalAlpha = Math.max(0, 1 - spark.age / .7);
     ctx.font = `650 ${spark.text.length > 1 ? 20 : 13}px "Work Sans Variable",sans-serif`;
     ctx.fillStyle = spark.good ? '#d60000' : '#000000';
-    ctx.fillText(spark.text, spark.x * width, spark.y * height); ctx.restore();
+    const halfText = ctx.measureText(spark.text).width / 2 + 10;
+    ctx.fillText(spark.text, Math.max(halfText, Math.min(width - halfText, spark.x * width)), spark.y * height); ctx.restore();
   }
 }
 
 function Rules({ detailed = false }: { detailed?: boolean }) {
   return <><div className="rush-rules">
-    <div><span className="rush-logo-samples">{(['figma', 'photoshop', 'claude'] as const).map(id => <span key={id} className="rush-tool"><img src={softwareLogos[id].src} alt={softwareLogos[id].name} /></span>)}</span><strong>Catch the tools</strong><p>10 points. Center it for 15.<br />Build a combo up to 4x.</p></div>
+    <div><span className="rush-logo-samples">{(['figma', 'photoshop', 'claude'] as const).map(id => <span key={id} className="rush-tool"><img src={softwareLogos[id].src} alt={softwareLogos[id].name} /></span>)}</span><strong>Catch the tools</strong><p>+1 second for every catch.<br />10 points. Up to 4x combos.</p></div>
     <div><span className="rush-bomb-sample"><Bomb size={30} /></span><strong>Dodge bombs</strong><p>Each hit costs a life.<br />You have three.</p></div>
-  </div>{detailed && <p className="rush-rule-detail">Move the red paddle with your mouse, finger, or arrow keys. Catch Figma, Adobe, HTML/CSS, and Claude logos. Land one in the center for a precision bonus. Every four catches boosts your multiplier, up to 4x. A missed tool or bomb resets your combo. Three waves get faster over 30 seconds. Daily uses the same drop sequence for everyone, refreshed at midnight UTC. Practice is slower and scores separately. Your best is saved only on this device.</p>}</>;
+  </div>{detailed && <p className="rush-rule-detail">Move the red paddle with your mouse, finger, or arrow keys. Start with 30 seconds. Every tool you catch adds one second. Catch Figma, Adobe, HTML/CSS, and Claude logos for 10 points, or 15 in the center. Every four catches boosts your multiplier, up to 4x. A missed tool or bomb resets your combo. The pace builds through three waves, then stays steady. Tools fall straight, with time to move between catches and dodge each bomb. Daily uses the same drop sequence for everyone, refreshed at midnight UTC. Practice is slower and scores separately. Your best is saved only on this device.</p>}</>;
 }
 
 export default function TypeRush({ onClose }: { onClose: () => void }) {
@@ -72,7 +73,7 @@ export default function TypeRush({ onClose }: { onClose: () => void }) {
       }
     }
     if (paddle.current) { paddle.current.style.left = `${current.paddle * 100}%`; paddle.current.style.width = `${paddleWidth(current.width) * 100}%`; }
-    if (progress.current) progress.current.style.transform = `scaleX(${Math.max(0, 1 - current.elapsed / ROUND_SECONDS)})`;
+    if (progress.current) progress.current.style.transform = `scaleX(${Math.max(0, Math.min(1, current.remaining / ROUND_SECONDS))})`;
   }, [reduced]);
   useLayoutEffect(() => { paint(); }, [items, paint]);
   const pause = useCallback(() => {
@@ -87,8 +88,7 @@ export default function TypeRush({ onClose }: { onClose: () => void }) {
       if (!surface.current || !canvas.current) return;
       const rect = surface.current.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
-      game.current.width = rect.width; game.current.height = rect.height;
-      game.current.drops.forEach(drop => Object.assign(drop, dropMetrics(drop.good, drop.text, rect.width)));
+      resizeRushGame(game.current, rect.width, rect.height);
       const ratio = Math.min(window.devicePixelRatio || 1, 2);
       canvas.current.width = Math.round(rect.width * ratio); canvas.current.height = Math.round(rect.height * ratio);
       paint();
@@ -167,15 +167,15 @@ export default function TypeRush({ onClose }: { onClose: () => void }) {
       <button type="button" className="icon-button rush-help" onClick={() => { pause(); setShowRules(!showRules); }} aria-label={showRules ? 'Close instructions' : 'How to play'} title="How to play" aria-pressed={showRules}>?</button>
 
     </div></div>
-    <div className="rush-hud"><div className="rush-stat"><span>Score</span><strong>{hud.score}</strong></div><div className="rush-stat rush-combo"><span>Combo</span><strong>{multiplier(hud.combo)}x</strong><span className="rush-combo-meter" aria-label={`${hud.combo} consecutive catches`}><span style={{ transform: `scaleX(${multiplier(hud.combo) === 4 ? 1 : (hud.combo % 4) / 4})` }} /></span></div><div className="rush-stat"><span>Lives</span><span className="rush-lives" aria-label={`${hud.lives} lives remaining`}>{[0, 1, 2].map(index => <span key={index} data-alive={index < hud.lives}><Heart size={16} /></span>)}</span></div><div className="rush-stat"><span>Time</span><strong className="rush-time" role="timer" aria-label="Seconds remaining">{hud.seconds}<small>s</small></strong></div></div>
-    <div className="rush-challenge"><div><span>{phase === 'playing' || phase === 'paused' ? `Wave ${hud.wave} / 3` : mode === 'rush' ? 'Daily challenge' : 'Practice run'}<strong>{hud.score >= 600 ? 'Gold unlocked' : `${goal.name} at ${goal.score}`}</strong></span><span>{records.persistent ? 'Device best' : 'Visit best'} <strong>{best}</strong></span></div><div className="rush-rank-track" role="progressbar" aria-label={`Progress to ${goal.name}`} aria-valuemin={0} aria-valuemax={goal.score} aria-valuenow={Math.min(hud.score, goal.score)}><span style={{ transform: `scaleX(${Math.min(1, hud.score / goal.score)})` }} /></div></div>
+    <div className="rush-hud"><div className="rush-stat"><span>Score</span><strong>{hud.score}</strong></div><div className="rush-stat rush-combo"><span>Combo</span><strong>{multiplier(hud.combo)}x</strong><span className="rush-combo-meter" aria-label={`${hud.combo} consecutive catches`}><span style={{ transform: `scaleX(${multiplier(hud.combo) === 4 ? 1 : (hud.combo % 4) / 4})` }} /></span></div><div className="rush-stat"><span>Lives</span><span className="rush-lives" aria-label={`${hud.lives} lives remaining`}>{[0, 1, 2].map(index => <span key={index} data-alive={index < hud.lives}><Heart size={16} /></span>)}</span></div><div className="rush-stat rush-clock"><span>Time</span><strong className="rush-time" role="timer" aria-label="Seconds remaining">{hud.seconds}<small>s</small></strong><motion.span key={hud.caught} className="rush-time-bonus" aria-hidden="true" initial={{ opacity: 0 }} animate={{ opacity: hud.caught ? [0, 1, 1, 0] : 0, y: reduced ? 0 : [5, 0, 0, -8] }} transition={{ duration: .95, times: [0, .12, .7, 1] }}>{hud.caught > 0 ? '+1s' : ''}</motion.span></div></div>
+    <div className="rush-challenge"><div><span>{phase === 'playing' || phase === 'paused' ? `Wave ${hud.wave} / 3` : mode === 'rush' ? 'Daily challenge' : 'Practice run'}<strong>{hud.score >= 600 ? 'Gold unlocked' : `${goal.name} at ${goal.score}`}</strong></span><span className="rush-live-best"><span>Personal best</span><strong>{best}</strong></span></div><div className="rush-rank-track" role="progressbar" aria-label={`Progress to ${goal.name}`} aria-valuemin={0} aria-valuemax={goal.score} aria-valuenow={Math.min(hud.score, goal.score)}><span style={{ transform: `scaleX(${Math.min(1, hud.score / goal.score)})` }} /></div></div>
     <div ref={surface} className="rush-field" data-phase={phase} role="group" tabIndex={0} aria-label="Tool Rush playing field" aria-describedby="rush-instructions" onKeyDown={onKey} onKeyUp={event => keys.current.delete(event.key)} onBlur={() => keys.current.clear()} onPointerMove={move} onPointerDown={event => { if (phase !== 'playing' || showRules) return; event.currentTarget.setPointerCapture(event.pointerId); event.currentTarget.focus({ preventScroll: true }); move(event); }}>
       <canvas ref={canvas} className="rush-canvas" aria-hidden="true" />
       {items.map(item => <span key={item.id} className={`rush-pickup ${item.good ? 'rush-tool' : 'rush-bomb'}`} data-tool={item.good ? item.text : undefined} aria-hidden="true" style={{ width: item.size, height: item.size }} ref={node => { if (node) itemNodes.current.set(item.id, node); else itemNodes.current.delete(item.id); }}>{item.good ? <img src={softwareLogos[item.text as ToolId].src} alt="" /> : <BombGlyph size={item.size} fill="currentColor" strokeWidth={1.5} />}</span>)}
       <div ref={paddle} className="rush-paddle" aria-hidden="true" />
       <AnimatePresence>{overlay && <motion.div className="rush-overlay" data-lenis-prevent initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .25 }}><AnimatePresence mode="wait" initial={false}><motion.div key={showRules ? 'rules' : phase} className="rush-overlay-content" initial={{ opacity: 0, y: reduced ? 0 : 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reduced ? 0 : -10 }} transition={{ duration: reduced ? 0 : .25 }}>
         {showRules ? <><h4>How to play</h4><Rules detailed /><button type="button" className="hero-cta rush-start" onClick={() => setShowRules(false)}>Got it<Play size={18} /></button></> : <>
-          {phase === 'ready' ? <><span className="rush-welcome-mark"><Gamepad size={44} /></span><span className="rush-kicker">30 seconds. Three lives. Your best to beat.</span><h4>Tools down.<br /><span>Game on.</span></h4><p className="rush-ready-tip">Slide to catch the tools. Dodge the bombs.</p><Rules /><p className="rush-personal-best">Personal best <strong>{best}</strong></p></> : phase === 'paused' ? <><span className="rush-kicker">Game paused</span><h4>Ready when<br /><span>you are.</span></h4><p>Your score and time are saved for this round.</p></> : <><span className="rush-kicker">{newBest ? 'New personal best' : hud.lives === 0 ? 'Out of lives. Go again?' : 'Time’s up. Nice run.'}</span><h4 className="rush-final-score">{hud.score}<span>{hud.score >= 150 ? `${rushRank(hud.score)} run` : 'points'}</span></h4><div className="rush-result-stats"><span><strong>{hud.caught}</strong>tools caught</span><span><strong>{hud.perfect}</strong>perfect catches</span><span><strong>{hud.longest}</strong>best streak</span></div><p>{mode === 'rush' ? 'Today’s' : 'Practice'} best: {best}</p></>}
+          {phase === 'ready' ? <><span className="rush-welcome-mark"><Gamepad size={44} /></span><span className="rush-kicker">Start with 30 seconds. Keep the clock alive.</span><h4>Tools down.<br /><span>Game on.</span></h4><p className="rush-ready-tip">Slide to catch the tools. Dodge the bombs.</p><Rules /><p className="rush-personal-best"><span>Personal best</span><strong>{best}</strong></p></> : phase === 'paused' ? <><span className="rush-kicker">Game paused</span><h4>Ready when<br /><span>you are.</span></h4><p>Your score and time are saved for this round.</p></> : <><span className="rush-kicker">{newBest ? 'New personal best' : hud.lives === 0 ? 'Out of lives. Go again?' : 'Time’s up. Nice run.'}</span><h4 className="rush-final-score">{hud.score}<span>{hud.score >= 150 ? `${rushRank(hud.score)} run` : 'points'}</span></h4><div className="rush-result-stats"><span><strong>{hud.caught}</strong>tools caught</span><span><strong>{hud.perfect}</strong>perfect catches</span><span><strong>{hud.longest}</strong>best streak</span></div><p className="rush-personal-best"><span>{newBest ? 'New personal best' : 'Personal best'}</span><strong>{best}</strong></p></>}
           {phase !== 'paused' && <div className="rush-modes" role="group" aria-label="Game mode"><button type="button" aria-label="Practice" aria-pressed={mode === 'flow'} onClick={() => chooseMode('flow')}>Practice<span>Learn the rhythm</span></button><button type="button" aria-label="Daily" aria-pressed={mode === 'rush'} onClick={() => chooseMode('rush')}>Daily<span>Three faster waves</span></button></div>}
           <button type="button" className="hero-cta rush-start" onClick={phase === 'paused' ? resume : start}>{phase === 'ready' ? 'Let’s play' : phase === 'paused' ? 'Keep going' : 'Play again'}{phase === 'ended' ? <RotateCcw size={18} /> : <Play size={18} />}</button>
         </>}

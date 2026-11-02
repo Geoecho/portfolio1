@@ -1137,3 +1137,23 @@ html.lenis,html.lenis body { height: auto; }
   .project-image-stage img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; touch-action: pinch-zoom; }
   .project-image-controls { position: static; margin-top: 16px; background: transparent; box-shadow: none; }
 }
+/* Give project typography space without changing the heading elsewhere. */
+.project-view-intro h2 { letter-spacing: -.012em; line-height: 1.13; font-kerning: normal; }
+.project-view-description { letter-spacing: .008em; word-spacing: .025em; line-height: 1.85; }
+.project-view-name { letter-spacing: .005em; }
+.project-view-intro > div > p, .project-visit { letter-spacing: .015em; }
+.rush-game.game-window, .game-window .rush-field { box-shadow: none; filter: none; }
+.game-window .rush-personal-best { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(100%,350px); margin-top: 18px; padding: 8px 0; font-size: 13px; font-weight: 550; text-align: left; }
+.game-window .rush-personal-best strong { margin: 0; color: #d60000; font-family: 'Work Sans Variable',system-ui,sans-serif; font-size: 38px; font-weight: 750; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.rush-challenge .rush-live-best { gap: 10px; }
+.rush-live-best > strong { color: #d60000; font-family: 'Work Sans Variable',system-ui,sans-serif; font-size: 22px; line-height: 1; font-weight: 750; font-variant-numeric: tabular-nums; }
+.rush-clock { position: relative; }
+.rush-time-bonus { position: absolute; top: 3px; right: 0; color: #d60000; font-size: 12px; font-weight: 650; pointer-events: none; }
+@media (max-height: 740px) {
+  .game-window .rush-welcome-mark { display: none; }
+  .game-window .rush-personal-best { margin-top: 12px; padding-block: 4px; }
+  .game-window .rush-personal-best strong { font-size: 30px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-window .rush-personal-best { display: flex; grid-column: 1; margin-top: 12px; max-width: 230px; }
+}

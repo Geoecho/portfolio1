@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npx tsc && vite build",
+    "test:game": "node --experimental-strip-types --test tests/tool-rush.test.mjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
