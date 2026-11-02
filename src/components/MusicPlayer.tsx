@@ -91,15 +91,15 @@ export default function MusicPlayer() {
     setRequested(true);
   };
 
-  const label = loading ? 'Loading Spotify playlist' : playing ? 'Pause guitar playlist' : 'Play guitar playlist on Spotify';
+  const label = loading ? 'Loading Spotify playlist' : playing ? 'Pause music' : 'Play music on Spotify';
   return <>
     <div className="music-controls">
     <button type="button" className={`dock-icon music-trigger ${playing ? 'is-playing' : ''}`} onClick={toggle} aria-label={label} title={label} aria-pressed={playing} aria-busy={loading} disabled={loading}>
       {loading ? <Loader2 size={19} className="loading-spinner" /> : playing ? <Pause size={19} /> : <Play size={19} />}
     </button>
-    {requested && <button type="button" className="dock-icon music-minimize" onClick={() => setMinimized(value => !value)} aria-label={minimized ? 'Expand Spotify player' : 'Minimize Spotify player'} aria-expanded={!minimized} aria-controls="spotify-player"><span className="music-track-label">Guitar playlist · Spotify</span>{minimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}</button>}
+    {requested && <button type="button" className="dock-icon music-minimize" onClick={() => setMinimized(value => !value)} aria-label={minimized ? 'Expand Spotify player' : 'Minimize Spotify player'} aria-expanded={!minimized} aria-controls="spotify-player"><span className="music-track-label">On repeat · Spotify</span>{minimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}</button>}
     </div>
-    <span className="sr-only" role="status">{error || (loading ? 'Loading the guitar playlist from Spotify.' : playing ? 'The guitar playlist is playing.' : '')}</span>
+    <span className="sr-only" role="status">{error || (loading ? 'Loading music from Spotify.' : playing ? 'Music is playing.' : '')}</span>
     {error && <a className="music-error" href={playlist} target="_blank" rel="noopener noreferrer">Open in Spotify <ArrowUpRight size={15} /></a>}
     {slot && requested && createPortal(<section id="spotify-player" className={`top-bar-music ${minimized ? 'is-minimized' : ''}`} aria-label="Spotify music player" aria-hidden={minimized} {...(minimized ? { inert: '' } : {})}>
       <div ref={host} id="music-playlist-embed" className={`music-embed-host ${showTracks ? 'show-tracks' : ''}`} />
