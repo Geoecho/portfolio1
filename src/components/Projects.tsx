@@ -58,8 +58,15 @@ export default function Projects({ selectedId, onSelect }: { selectedId: number 
     const root = section.current!;
     const stage = root.querySelector<HTMLElement>('.work-grid')!;
     const cards = Array.from(stage.querySelectorAll<HTMLElement>(':scope > article'));
+    const resetCardContents = () => {
+      // React reuses project nodes across filters, including formerly hidden back cards.
+      gsap.set(stage.querySelectorAll('.work-info, .work-description'), { clearProps: 'opacity,visibility,transform' });
+      gsap.set(stage.querySelectorAll('.work-art > img'), { clearProps: 'clipPath' });
+    };
+    resetCardContents();
     const media = gsap.matchMedia();
     media.add({ motion: '(prefers-reduced-motion: no-preference)', space: '(min-height: 640px)' }, match => {
+      resetCardContents();
       if (!match.conditions?.motion || !match.conditions.space) {
         if (match.conditions?.motion) cards.forEach(card => gsap.from(card, { autoAlpha: 0, y: 32, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: card, start: 'top 90%', once: true } }));
         return;
@@ -101,7 +108,7 @@ export default function Projects({ selectedId, onSelect }: { selectedId: number 
 
       const timeline = gsap.timeline({
         scrollTrigger: {
-          id: 'project-stack', trigger: stage,
+          id: 'project-stack', trigger: stage, refreshPriority: 1,
           start: () => `top ${(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-bar-clearance')) || 92) + 12}px`,
           end: () => `+=${Math.max(480, window.innerHeight * .78) * (cards.length - 1)}`,
           pin: true, pinSpacing: true, scrub: .4, anticipatePin: 1,
@@ -143,7 +150,11 @@ export default function Projects({ selectedId, onSelect }: { selectedId: number 
         cards.forEach(card => { delete card.dataset.front; });
       };
     });
-    const frame = requestAnimationFrame(() => ScrollTrigger.refresh());
+    const frame = requestAnimationFrame(() => {
+      // Recreated pins must be measured before sections that depend on their spacing.
+      ScrollTrigger.sort();
+      ScrollTrigger.refresh();
+    });
     return () => { cancelAnimationFrame(frame); media.revert(); };
   }, { scope: section, dependencies: [filter, reduced], revertOnUpdate: true });
   return <section ref={section} id="projects" className="editorial-section">

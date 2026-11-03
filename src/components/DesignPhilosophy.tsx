@@ -13,7 +13,7 @@ const principles = [
 
 export default function DesignPhilosophy() {
   const section = useRef<HTMLElement>(null);
-  useSectionMotion(section, '.principle-card', true);
+  useSectionMotion(section, '.principle-card');
   useGSAP(() => {
     const media = gsap.matchMedia();
     media.add('(prefers-reduced-motion: no-preference)', () => {
