@@ -7,9 +7,10 @@ let savedOverflow = '';
 let savedInert = false;
 
 /** Page-sized views keep the portfolio's scroll position and keyboard focus. */
-export default function FullscreenView({ children, className, labelledBy, onClose, onEscape, direction = 'right' }: {
+export default function FullscreenView({ children, className, labelledBy, onClose, onEscape, direction = 'right', transitionStyle = 'slide' }: {
   children: ReactNode; className: string; labelledBy: string; onClose: () => void;
   onEscape?: () => void; direction?: 'right' | 'bottom';
+  transitionStyle?: 'slide' | 'curtain';
 }) {
   const root = useRef<HTMLDivElement>(null);
   const reduced = useMotionPreference();
@@ -46,7 +47,11 @@ export default function FullscreenView({ children, className, labelledBy, onClos
     };
   }, []);
   const offset = direction === 'right' ? { x: '100%' } : { y: '100%' };
-  return <motion.div ref={root} className={`fullscreen-view ${className}`} role="dialog" aria-modal="true" aria-labelledby={labelledBy} tabIndex={-1} data-lenis-prevent
-    initial={reduced ? { opacity: 0 } : offset} animate={{ x: 0, y: 0, opacity: 1 }} exit={reduced ? { opacity: 0 } : offset}
-    transition={{ duration: reduced ? 0 : .6, ease: [.22, 1, .36, 1] }}>{children}</motion.div>;
+  const curtain = transitionStyle === 'curtain';
+  const ease = [.22, 1, .36, 1] as const;
+  return <motion.div ref={root} className={`fullscreen-view ${className}${curtain ? ' has-curtain' : ''}`} role="dialog" aria-modal="true" aria-labelledby={labelledBy} tabIndex={-1} data-lenis-prevent
+    initial={reduced ? { opacity: 0 } : offset} animate={{ x: 0, y: 0, opacity: 1 }} exit={reduced ? { opacity: 0 } : { ...offset, ...(curtain && { transition: { duration: .34, delay: .12, ease } }) }}
+    transition={{ duration: reduced ? 0 : curtain ? .34 : .6, ease }}>
+    {curtain ? <motion.div className="fullscreen-content" initial={reduced ? false : { x: '100%' }} animate={{ x: 0 }} exit={{ x: reduced ? 0 : '100%', transition: { duration: reduced ? 0 : .34, ease } }} transition={{ duration: reduced ? 0 : .38, delay: reduced ? 0 : .1, ease }}>{children}</motion.div> : children}
+  </motion.div>;
 }

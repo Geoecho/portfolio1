@@ -31,11 +31,11 @@ function ProjectView({ project, onClose }: { project: Project; onClose: () => vo
     document.addEventListener('keydown', keyboard);
     return () => document.removeEventListener('keydown', keyboard);
   }, [project]);
-  return <FullscreenView className="project-view" labelledBy="project-title" onClose={onClose}>
+  return <FullscreenView className="project-view" labelledBy="project-title" onClose={onClose} transitionStyle="curtain">
     <header className="project-view-bar"><button type="button" className="view-back" onClick={onClose}><ArrowLeft size={20} /><span>Back</span></button><span className="project-view-name">{project.name}</span>{project.url && <a className="project-visit" href={project.url} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={18} /></a>}</header>
     <div className="project-view-scroll">
-      <div className="project-view-intro"><motion.div {...reveal(.18)}><p>{project.category}</p><h2 id="project-title">{project.name}<span>.</span></h2></motion.div><motion.p {...reveal(.26)} className="project-view-description">{project.longDescription}</motion.p></div>
-      <motion.div {...reveal(.3)} className="project-view-gallery">
+      <div className="project-view-intro"><motion.div {...reveal(.3)}><p>{project.category}</p><h2 id="project-title">{project.name}<span>.</span></h2></motion.div><motion.p {...reveal(.38)} className="project-view-description">{project.longDescription}</motion.p></div>
+      <motion.div {...reveal(.34)} className="project-view-gallery">
         <div className="project-image-stage">
           <AnimatePresence mode="wait" initial={false}><motion.img key={slide} src={project.detailImages[slide]} alt={project.name + ' design, image ' + (slide + 1)} initial={{ opacity: 0, y: reduced ? 0 : 16, filter: reduced ? 'none' : 'blur(6px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .3 }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={.12} dragMomentum={false} onDragEnd={(_, info) => { if (info.offset.x < -40 || (info.offset.x < -12 && info.velocity.x < -450)) go(1); else if (info.offset.x > 40 || (info.offset.x > 12 && info.velocity.x > 450)) go(-1); }} /></AnimatePresence>
         </div>
@@ -67,12 +67,29 @@ export default function Projects({ selectedId, onSelect }: { selectedId: number 
       root.classList.add('work-stack');
       const position = (slot: number) => ({ y: slot * 18, scale: 1 - slot * .045, filter: `blur(${slot * 3}px)`, autoAlpha: slot < 3 ? 1 : 0 });
       cards.forEach((card, index) => gsap.set(card, { ...position(Math.min(index, 3)), zIndex: cards.length - index, yPercent: 0 }));
+      const reveals = cards.slice(1).map(card => ({
+        progress: 0,
+        animation: gsap.timeline({ paused: true })
+          .fromTo(card.querySelector('.work-art > img'), { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: .58, ease: 'power2.out', clearProps: 'clipPath' }, 0)
+          .fromTo(card.querySelectorAll('.work-info, .work-description'), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, stagger: .07, duration: .4, ease: 'power3.out', clearProps: 'opacity,visibility,transform' }, .16),
+      }));
+      const revealThrough = (time: number) => reveals.forEach((reveal, index) => {
+        const next = Math.min(1, Math.max(0, (time - index - .4) / .6));
+        // A return scroll never hides an image or copy the visitor has already seen.
+        reveal.progress = Math.max(reveal.progress, reveal.animation.progress());
+        if (next > reveal.progress) { reveal.progress = next; reveal.animation.progress(next); }
+      });
       let active = -1;
       const showActive = (index: number) => {
         if (active === index) return;
         active = index;
+        // Finish the active project's entrance even if the visitor stops scrolling.
+        if (index > 0) reveals[index - 1].animation.play();
         root.dataset.projectIndex = String(index);
-        cards.forEach((card, i) => { card.dataset.front = String(i === index); });
+        cards.forEach((card, i) => {
+          card.dataset.front = String(i === index);
+          card.style.zIndex = String(i < index ? 0 : cards.length - i);
+        });
         setScrollIndicator(root.querySelector('.work-stack-indicator'), index, visible[index].name);
       };
       showActive(0);
@@ -98,7 +115,11 @@ export default function Projects({ selectedId, onSelect }: { selectedId: number 
         }
       }
       timeline.to({}, { duration: .5 }, cards.length - 1);
-      timeline.eventCallback('onUpdate', () => showActive(Math.min(cards.length - 1, Math.floor(timeline.time() + .25))));
+      timeline.eventCallback('onUpdate', () => {
+        revealThrough(timeline.time());
+        showActive(Math.min(cards.length - 1, Math.floor(timeline.time() + .25)));
+      });
+      revealThrough(timeline.time());
       // Tabbing to the next card also brings it to the front of the scroll scene.
       let focusFrame = 0;
       focusProject.current = index => {
